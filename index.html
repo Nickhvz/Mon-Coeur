@@ -1,0 +1,2461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Mon Cœur ♡</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+
+/* ══════════════════════════════════════════
+   TOKENS — paleta clara y romántica
+══════════════════════════════════════════ */
+:root{
+  --white:      #fffaf9;
+  --cream:      #fff6f3;
+  --pink-pale:  #ffe6f0;
+  --pink:       #ffb9d8;
+  --pink-mid:   #f889bb;
+  --pink-deep:  #ea5a9a;
+  --pink-strong:#d43e82;
+  --purple-pale:#f1e6fb;
+  --purple:     #d9bdf2;
+  --purple-mid: #b98be0;
+  --purple-deep:#8f5cc7;
+  --ink:        #5a3a52;
+  --ink-soft:   #8a6a82;
+  --gold:       #d7a94a;
+  --shadow-pink: rgba(230,90,150,0.18);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+html, body{
+  width:100%; min-height:100%;
+  font-family:'Cormorant Garamond', Georgia, serif;
+  background: var(--pink-pale);
+  color: var(--ink);
+  overflow-x:hidden;
+}
+h1,h2,h3{ font-family:'Playfair Display', serif; }
+::selection{ background: var(--pink-pale); color: var(--pink-strong); }
+
+button{ font-family:inherit; }
+
+/* ══════════════════════════════════════════
+   PANTALLA 0 — CORAZÓN DE BIENVENIDA
+══════════════════════════════════════════ */
+#heart-intro{
+  position:fixed; inset:0; z-index:600;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap: 1.6rem;
+  background:
+    radial-gradient(circle at 25% 15%, #fff0f6 0%, transparent 55%),
+    radial-gradient(circle at 80% 85%, #f3e6fc 0%, transparent 55%),
+    linear-gradient(160deg, var(--white) 0%, var(--pink-pale) 55%, var(--purple-pale) 100%);
+  transition: opacity .9s ease, visibility .9s ease;
+  padding: 1.5rem;
+  text-align:center;
+  cursor:pointer;
+}
+#heart-intro.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+/* ── Flores decorativas en Heart-Intro y Candado ── */
+.entry-deco{
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+  filter: drop-shadow(0 10px 24px rgba(200,100,150,0.18));
+}
+.entry-deco.peony{ top:-4%; left:-8%; width:min(220px, 46vw); opacity:0.92; transform: rotate(-8deg); }
+.entry-deco.rose{ top:-3%; right:-7%; width:min(190px, 42vw); opacity:0.92; transform: rotate(10deg); }
+.entry-deco.lily-real{ bottom:-3%; left:-6%; width:min(200px, 44vw); opacity:0.9; transform: rotate(6deg); }
+.entry-deco.lily-water{ bottom:-4%; right:-6%; width:min(210px, 46vw); opacity:0.9; transform: rotate(-6deg); }
+.entry-deco.cloud-mid{ top:38%; left:50%; transform:translate(-50%,-50%); width:min(340px, 78vw); opacity:0.55; }
+.entry-deco.cloud2{ top:6%; left:50%; transform:translateX(-50%); width:min(260px, 60vw); opacity:0.65; }
+.entry-deco.lirio{ top:16%; right:2%; width:min(150px, 34vw); opacity:0.85; transform: rotate(12deg); }
+@media (max-width: 480px){
+  .entry-deco{ filter: drop-shadow(0 6px 14px rgba(200,100,150,0.15)); }
+  .entry-deco.peony{ width:150px; }
+  .entry-deco.rose{ width:130px; }
+  .entry-deco.lily-real{ width:140px; }
+  .entry-deco.lily-water{ width:145px; }
+  .entry-deco.cloud-mid{ width:280px; opacity:0.45; }
+  .entry-deco.cloud2{ width:220px; opacity:0.55; }
+  .entry-deco.lirio{ width:105px; }
+}
+/* aseguramos que el contenido central quede por encima de las flores */
+#heart-intro > *:not(.entry-deco):not(.ambient-hearts-canvas):not(.love-sparkles), #lock-screen > *:not(.entry-deco):not(.ambient-hearts-canvas):not(.love-sparkles){ position:relative; z-index:1; }
+#intro-heart-stage{
+  position:relative;
+  width:min(420px, 82vw); height:min(370px, 50vh);
+  perspective:900px;
+}
+#intro-heart-canvas{ position:absolute; inset:0; width:100%; height:100%; }
+
+/* ══════════════════════════════════════════
+   CORAZÓN DE PALABRAS QUE CAEN (compartido)
+══════════════════════════════════════════ */
+.love-heart-stage{ position:relative; overflow:visible; }
+.love-heart-ring{ position:absolute; inset:0; }
+.love-word{
+  position:absolute;
+  left:0; top:0;
+  font-family:'Cormorant Garamond', serif;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: 0.4px;
+  color: var(--pink-deep);
+  text-shadow: 0 2px 8px rgba(234,90,154,0.28);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(calc(var(--sx) - 50%), -70px, 0) rotate(0deg) scale(0.8);
+  animation:
+    loveFall var(--dur, 6s) var(--delay, 0s) cubic-bezier(.33,0,.2,1) infinite,
+    loveGlow 3.4s var(--glow-delay, 1s) ease-in-out infinite;
+}
+@keyframes loveFall{
+  0%{
+    transform: translate3d(calc(var(--sx) - 50%), -70px, 0) rotate(0deg) scale(0.78);
+    opacity: 0;
+  }
+  10%{
+    transform: translate3d(calc(var(--mx) - 50%), calc(var(--fy) - 55% - 10px), 0) rotate(calc(var(--rot) * 0.5)) scale(1.12);
+    opacity: 1;
+  }
+  16%{
+    transform: translate3d(calc(var(--fx) - 50%), calc(var(--fy) - 50% - 9px), 0) rotate(var(--rot)) scale(1.06);
+  }
+  21%{
+    transform: translate3d(calc(var(--fx) - 50%), calc(var(--fy) - 50% + 3px), 0) rotate(var(--rot)) scale(0.98);
+  }
+  26%, 88%{
+    transform: translate3d(calc(var(--fx) - 50%), calc(var(--fy) - 50%), 0) rotate(var(--rot)) scale(1);
+    opacity: var(--rest-op, 0.92);
+  }
+  97%{
+    transform: translate3d(calc(var(--fx) - 50%), calc(var(--fy) - 50% - 14px), 0) rotate(var(--rot)) scale(0.9);
+    opacity: 0;
+  }
+  100%{
+    transform: translate3d(calc(var(--sx) - 50%), -70px, 0) rotate(0deg) scale(0.78);
+    opacity: 0;
+  }
+}
+@keyframes loveGlow{
+  0%,100%{ text-shadow: 0 2px 8px rgba(234,90,154,0.26); color: var(--pink-deep); }
+  50%{ text-shadow: 0 2px 16px rgba(234,90,154,0.5), 0 0 22px rgba(185,139,224,0.32); color: var(--pink-strong); }
+}
+
+.love-sparkles{ position:absolute; inset:0; overflow:hidden; pointer-events:none; z-index:1; }
+.love-sparkles span{
+  position:absolute;
+  color: var(--purple-mid);
+  opacity: 0;
+  animation: loveSparkle 5s ease-in-out infinite;
+  text-shadow: 0 0 8px rgba(217,189,242,0.6);
+}
+@keyframes loveSparkle{
+  0%   { opacity: 0; transform: scale(0.5) translateY(0); }
+  20%  { opacity: 0.9; }
+  75%  { opacity: 0.4; }
+  100% { opacity: 0; transform: scale(1.15) translateY(-26px); }
+}
+
+/* Corazones ambientales flotando de fondo (pantallas de bienvenida y candado) */
+.ambient-hearts-canvas{
+  position:absolute; inset:0;
+  width:100%; height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Contenido por encima de las capas decorativas (canvas de corazones + chispas) */
+.lock-tagline{ position:relative; z-index:2; }
+.intro-hint{
+  font-family:'DM Serif Display', serif;
+  font-style:italic;
+  color: var(--pink-mid);
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  font-size: clamp(0.85rem, 2.4vw, 1.05rem);
+  animation: hintBlink 2.2s ease-in-out infinite;
+  position: relative;
+  z-index: 2;
+}
+
+/* ══════════════════════════════════════════
+   PANTALLA 1 — CANDADO DINÁMICO
+══════════════════════════════════════════ */
+#lock-screen{
+  position:fixed; inset:0; z-index:500;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap: 1.6rem;
+  background:
+    radial-gradient(circle at 30% 20%, #fff0f6 0%, transparent 55%),
+    radial-gradient(circle at 75% 80%, #f3e6fc 0%, transparent 55%),
+    linear-gradient(160deg, var(--white) 0%, var(--pink-pale) 55%, var(--purple-pale) 100%);
+  transition: opacity 1s ease, visibility 1s ease;
+  padding: 1.5rem;
+  text-align:center;
+  opacity:0; visibility:hidden; pointer-events:none;
+}
+#lock-screen.visible{ opacity:1; visibility:visible; pointer-events:all; }
+#lock-screen.hidden{ opacity:0; visibility:hidden; pointer-events:none; }
+
+.lock-tagline{
+  font-family:'DM Serif Display', serif;
+  font-style:italic;
+  color: var(--pink-strong);
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
+  letter-spacing: 0.05em;
+}
+.lock-tagline .coeur{
+  display:block;
+  font-size: clamp(1.7rem, 5vw, 2.6rem);
+  color: var(--purple-deep);
+  margin-top:0.2rem;
+  text-shadow: 0 2px 18px var(--shadow-pink);
+  animation: coeurGlow 3s ease-in-out infinite;
+}
+@keyframes coeurGlow{
+  0%,100%{ text-shadow: 0 2px 16px var(--shadow-pink); color: var(--purple-deep); }
+  50%{ text-shadow: 0 4px 30px rgba(230,90,150,0.35), 0 0 46px rgba(185,139,224,0.28); color: var(--purple-mid); }
+}
+
+#padlock-wrap{
+  position:relative;
+  z-index:2;
+  width: min(180px, 42vw);
+  height: min(180px, 42vw);
+  cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: transform .5s cubic-bezier(.22,1,.36,1);
+}
+#padlock-wrap:hover{ transform: scale(1.05) rotate(-2deg); }
+#padlock-wrap.shake{ animation: lockShake .5s ease; }
+#padlock-wrap.opened{ animation: lockPop .7s cubic-bezier(.22,1,.36,1) forwards; }
+@keyframes lockShake{
+  0%,100%{ transform: translateX(0); }
+  20%{ transform: translateX(-10px) rotate(-4deg); }
+  40%{ transform: translateX(9px) rotate(4deg); }
+  60%{ transform: translateX(-6px) rotate(-2deg); }
+  80%{ transform: translateX(6px) rotate(2deg); }
+}
+@keyframes lockPop{
+  0%{ transform: scale(1); }
+  40%{ transform: scale(1.18); }
+  100%{ transform: scale(0.2); opacity:0; }
+}
+#padlock-glow{
+  position:absolute; inset:-18%;
+  border-radius:50%;
+  background: radial-gradient(circle, rgba(255,140,190,0.55) 0%, rgba(255,140,190,0) 70%);
+  animation: glowPulse 2.6s ease-in-out infinite;
+  pointer-events:none;
+}
+@keyframes glowPulse{
+  0%,100%{ transform: scale(0.9); opacity:0.55; }
+  50%{ transform: scale(1.12); opacity:1; }
+}
+.padlock-img{
+  position:relative;
+  width:78%; height:78%;
+  object-fit:contain;
+  filter: drop-shadow(0 12px 24px var(--shadow-pink));
+  user-select:none; -webkit-user-drag:none;
+  transition: filter .4s ease;
+}
+#padlock-wrap.unlocking .padlock-img{ animation: padlockUnlock .6s ease forwards; }
+@keyframes padlockUnlock{
+  0%  { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(1.09) rotate(-5deg); filter: drop-shadow(0 14px 30px rgba(255,120,180,0.55)); }
+  55% { transform: scale(0.95) rotate(4deg); }
+  100%{ transform: scale(1.04) rotate(0deg); filter: drop-shadow(0 16px 34px rgba(255,120,180,0.6)); }
+}
+
+.lock-hint{
+  position:relative; z-index:2;
+  font-family:'DM Serif Display', serif;
+  font-style:italic;
+  color: var(--pink-mid);
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  font-size: clamp(0.85rem, 2.4vw, 1.05rem);
+  animation: hintBlink 2.2s ease-in-out infinite;
+}
+@keyframes hintBlink{ 0%,100%{opacity:.4;} 50%{opacity:1;} }
+.lock-hint.hint-hidden{ animation:none; opacity:0; transition:opacity .4s ease; }
+
+#lock-form{
+  position:relative; z-index:2;
+  display:flex; flex-direction:column; align-items:center; gap:0.9rem;
+  max-width: 320px; width: 88vw;
+  opacity:0; max-height:0; overflow:hidden;
+  transition: opacity .5s ease, max-height .5s ease, margin .5s ease;
+}
+#lock-form.open{ opacity:1; max-height:260px; margin-top:0.4rem; }
+.lock-question{
+  font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--ink); font-size: clamp(1rem, 3vw, 1.2rem);
+}
+#lock-input{
+  width:100%;
+  text-align:center;
+  font-family:'Cormorant Garamond', serif;
+  font-size:1.3rem;
+  letter-spacing:0.06em;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--pink);
+  background: rgba(255,255,255,0.85);
+  color: var(--ink);
+  outline:none;
+  box-shadow: 0 6px 18px rgba(230,90,150,0.12);
+  transition: border-color .25s, box-shadow .25s;
+}
+#lock-input:focus{ border-color: var(--pink-strong); box-shadow: 0 6px 20px rgba(230,90,150,0.28); }
+#lock-submit{
+  border:none; cursor:pointer;
+  padding: 0.65rem 2rem;
+  border-radius: 999px;
+  font-family:'DM Serif Display', serif; font-style:italic; font-size:1.05rem;
+  color:#fff;
+  background: linear-gradient(120deg, var(--pink-strong), var(--purple-deep));
+  box-shadow: 0 10px 24px var(--shadow-pink);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+#lock-submit:hover{ transform: translateY(-2px) scale(1.03); box-shadow: 0 14px 30px var(--shadow-pink); }
+#lock-error{
+  color: var(--pink-strong);
+  font-size: 0.95rem;
+  font-style: italic;
+  min-height: 1.2rem;
+}
+
+/* ══════════════════════════════════════════
+   EXPLOSIÓN DE ROSAS
+══════════════════════════════════════════ */
+#rose-canvas{
+  position:fixed; inset:0; z-index:600;
+  width:100%; height:100%;
+  pointer-events:none;
+  opacity:0;
+  transition: opacity .4s ease;
+}
+#rose-canvas.active{ opacity:1; }
+
+/* ══════════════════════════════════════════
+   SITIO PRINCIPAL
+══════════════════════════════════════════ */
+#site{
+  opacity:0; visibility:hidden;
+  transition: opacity 1.2s ease;
+}
+#site.visible{ opacity:1; visibility:visible; }
+
+/* NAV */
+.music-widget{
+  position:fixed; right:14px; bottom:14px; z-index:300;
+  display:flex; flex-direction:column; align-items:center;
+}
+.music-volume-pop{
+  height:96px; width:38px; margin-bottom:0.55rem;
+  background:#fff; border-radius:999px;
+  box-shadow: 0 10px 24px rgba(180,90,150,0.28);
+  display:flex; align-items:center; justify-content:center;
+  opacity:0; transform: translateY(10px) scale(0.85); pointer-events:none;
+  transition: opacity .22s ease, transform .22s ease;
+}
+.music-widget.expanded .music-volume-pop,
+.music-widget:hover .music-volume-pop{ opacity:1; transform:none; pointer-events:auto; }
+.music-volume-pop input[type="range"]{
+  -webkit-appearance:none; appearance:none;
+  width:82px; height:4px; border-radius:999px; outline:none; cursor:pointer;
+  background: linear-gradient(90deg, var(--pink-strong), var(--purple-deep));
+  transform: rotate(-90deg);
+}
+.music-volume-pop input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:15px; height:15px; border-radius:50%;
+  background:#fff; border:2.5px solid var(--pink-strong);
+  box-shadow: 0 2px 6px rgba(180,90,150,0.4); cursor:pointer;
+}
+.music-volume-pop input[type="range"]::-moz-range-thumb{
+  width:15px; height:15px; border-radius:50%;
+  background:#fff; border:2.5px solid var(--pink-strong); cursor:pointer;
+}
+.music-buttons{ position:relative; }
+.music-expand-handle{
+  position:absolute; top:-5px; right:-5px; width:19px; height:19px; border-radius:50%;
+  background:#fff; color:var(--pink-strong); border:none; font-size:0.62rem;
+  display:flex; align-items:center; justify-content:center; cursor:pointer;
+  box-shadow: 0 4px 10px rgba(180,90,150,0.3); transition: transform .18s ease; z-index:1;
+}
+.music-expand-handle:hover{ transform: scale(1.15); }
+#music-toggle{
+  position:relative;
+  width:44px; height:44px; border-radius:50%; border:none;
+  background: linear-gradient(135deg, var(--pink-strong), var(--purple-deep));
+  color:#fff; font-size:1.2rem;
+  display:flex; align-items:center; justify-content:center;
+  box-shadow: 0 8px 20px rgba(180,90,150,0.35);
+  cursor:pointer; transition: transform .25s ease, opacity .25s ease;
+}
+#music-toggle:hover{ transform: scale(1.08); }
+#music-toggle.muted{ opacity:0.55; }
+#music-toggle.muted::after{ content:''; }
+#main-nav{
+  position:sticky; top:0; z-index:200;
+  display:flex; justify-content:center; align-items:center;
+  padding: 0.9rem 1rem 1.4rem;
+  background: linear-gradient(180deg, rgba(255,241,247,0.92) 0%, rgba(255,241,247,0.55) 70%, rgba(255,241,247,0) 100%);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+#nav-pill{
+  display:flex; gap: 0.3rem;
+  background: var(--pink-pale);
+  border-radius: 999px;
+  padding: 0.3rem;
+  max-width: 96vw;
+  overflow-x:auto;
+  scrollbar-width:none;
+}
+#nav-pill::-webkit-scrollbar{ display:none; }
+.nav-btn{
+  border:none; background:transparent; cursor:pointer;
+  white-space:nowrap;
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  font-family:'Cormorant Garamond', serif;
+  font-size: clamp(0.85rem, 2vw, 1rem);
+  letter-spacing:0.03em;
+  color: var(--ink-soft);
+  transition: background .25s ease, color .25s ease, box-shadow .25s ease;
+}
+.nav-btn:hover{ color: var(--pink-strong); }
+.nav-btn.active{
+  background: linear-gradient(120deg, var(--pink-strong), var(--purple-deep));
+  color:#fff;
+  box-shadow: 0 6px 16px var(--shadow-pink);
+}
+
+/* SECCIONES */
+.tab-section{
+  display:none;
+  min-height: calc(100vh - 64px);
+  padding: 2.2rem 1.2rem 4rem;
+  position:relative;
+  overflow:hidden;
+  animation: fadeUp .6s ease;
+}
+.tab-section.active{ display:block; }
+@keyframes fadeUp{
+  from{ opacity:0; transform: translateY(14px); }
+  to{ opacity:1; transform:none; }
+}
+
+.section-title{
+  text-align:center;
+  font-style:italic; font-weight:600;
+  font-size: clamp(1.6rem, 4.5vw, 2.4rem);
+  background: linear-gradient(120deg, var(--pink-strong), var(--purple-deep));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+  margin-bottom: 0.3rem;
+}
+.section-sub{
+  text-align:center; color: var(--ink-soft); font-style:italic;
+  font-size: clamp(0.9rem, 2.2vw, 1.05rem);
+  margin-bottom: 2rem;
+}
+
+/* ── DECORACIONES AMBIENTALES (nubes y corazones) ── */
+.decor-cloud, .decor-hearts{
+  position:absolute;
+  pointer-events:none;
+  z-index:0;
+  user-select:none;
+  filter: drop-shadow(0 10px 22px rgba(180,120,180,0.12));
+}
+.decor-cloud.top-left{ top:-14px; left:-6%; width:min(300px, 46vw); opacity:0.65; }
+.decor-cloud.top-right{ top:-18px; right:-8%; width:min(340px, 52vw); opacity:0.6; transform:scaleX(-1); }
+.decor-cloud.center-top{ top:-10px; left:50%; transform:translateX(-50%); width:min(460px, 78vw); opacity:0.5; }
+.decor-hearts{ width:min(190px, 34vw); opacity:0.85; }
+.decor-hearts.beside-title{ top:2px; right:4%; }
+/* flourish: imagen decorativa AL FINAL de una sección, en flujo normal (no absoluta) */
+.decor-flourish{
+  display:block; margin: 2.6rem auto 0;
+  max-width: min(260px, 60vw);
+  opacity: 0.85;
+  pointer-events:none; user-select:none;
+  filter: drop-shadow(0 10px 22px rgba(180,120,180,0.14));
+}
+.decor-flourish.small{ max-width:min(190px, 46vw); }
+.decor-flourish.flip{ transform:scaleX(-1); }
+/* aseguramos que el contenido quede sobre las decoraciones */
+.tab-section > *:not(.decor-cloud):not(.decor-hearts):not(.petal-canvas){ position:relative; z-index:1; }
+@media (max-width: 520px){
+  .decor-cloud{ opacity:0.4 !important; }
+  .decor-hearts{ opacity:0.7; }
+}
+
+/* ── HOME ── */
+#tab-home{ background: linear-gradient(180deg, var(--pink-pale) 0%, var(--cream) 22%, var(--white) 55%); }
+#tab-nosotros{ background: linear-gradient(180deg, var(--pink-pale) 0%, var(--cream) 22%, var(--white) 55%); }
+#tab-gallery{ background: linear-gradient(180deg, var(--pink-pale) 0%, var(--cream) 22%, var(--white) 55%); }
+
+#heart-stage{
+  position:relative;
+  width:min(360px, 78vw); height:min(320px, 42vh);
+  margin: 0 auto;
+  perspective:900px;
+}
+#heart-canvas{ position:absolute; inset:0; width:100%; height:100%; }
+
+.home-flowers-row{
+  display:flex; justify-content:center; gap:0.8rem; margin: 0.6rem 0 2rem;
+}
+.home-flowers-row img{
+  width:34px; height:34px; object-fit:contain;
+  filter: drop-shadow(0 4px 10px var(--shadow-pink));
+  animation: floatFlower 4s ease-in-out infinite;
+}
+.home-flowers-row img:nth-child(2){ animation-delay:.5s; width:44px; height:44px; }
+.home-flowers-row img:nth-child(3){ animation-delay:1s; }
+@keyframes floatFlower{
+  0%,100%{ transform: translateY(0) rotate(0deg); }
+  50%{ transform: translateY(-8px) rotate(6deg); }
+}
+
+/* Collage de fotos "Nuestros momentos" */
+.home-collage-title{
+  text-align:center; font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--purple-deep); margin: 0.2rem 0 1.6rem; font-size:1.1rem;
+}
+.home-collage{
+  display:flex; flex-wrap:wrap; justify-content:center;
+  gap: 1.1rem 0.9rem;
+  max-width: 520px; margin: 0 auto 2.4rem;
+}
+.home-collage .hc-item{
+  width: 128px;
+  background:#fff; border-radius:10px; padding:8px 8px 26px;
+  box-shadow: 0 12px 26px rgba(180,120,180,0.2);
+  transform: rotate(var(--r,0deg));
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.home-collage .hc-item:hover{ transform: rotate(0deg) scale(1.07); box-shadow: 0 18px 36px rgba(180,120,180,0.3); z-index:3; }
+.home-collage .hc-item img{
+  width:100%; aspect-ratio: 1/1.05; object-fit:cover; border-radius:3px; display:block;
+}
+@media (max-width: 480px){
+  .home-collage .hc-item{ width: 104px; padding:6px 6px 20px; }
+}
+
+/* Collage tipo scrapbook — "Detalles que nos hemos dado" */
+.details-title{
+  text-align:center; font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--purple-deep); margin: 0.4rem 0 0.4rem; font-size:1.15rem;
+}
+.details-sub{
+  text-align:center; color: var(--ink-soft); font-style:italic;
+  font-size:0.88rem; margin-bottom:1.6rem;
+}
+.detail-scrapbook{
+  columns: 2;
+  column-gap: 1rem;
+  max-width: 560px;
+  margin: 0 auto 1rem;
+}
+@media (min-width: 620px){
+  .detail-scrapbook{ columns: 3; max-width: 780px; }
+}
+.detail-scrapbook.js-masonry{
+  display:flex; align-items:flex-start; gap:1rem; columns:unset;
+}
+.dc-col{ flex:1 1 0; min-width:0; display:flex; flex-direction:column; }
+.detail-scrapbook .dc-item{
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  margin: 0 0 1.1rem;
+  background:#fff;
+  padding: 8px 8px 20px;
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(180,120,180,0.22);
+  transform: rotate(var(--r, 0deg));
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.detail-scrapbook .dc-item:hover{
+  transform: rotate(0deg) scale(1.04);
+  box-shadow: 0 18px 38px rgba(180,120,180,0.32);
+  z-index:3; position:relative;
+}
+.detail-scrapbook .dc-item img{
+  width:100%; display:block; border-radius:2px;
+}
+.detail-scrapbook .dc-caption{
+  display:block; text-align:center; margin-top:7px;
+  font-family:'Cormorant Garamond', serif; font-style:italic;
+  color: var(--ink-soft); font-size:0.82rem;
+}
+.dc-item-solo-wrap{ display:flex; justify-content:center; margin: 0.2rem 0 1.4rem; }
+.dc-item-solo-wrap .dc-item{
+  break-inside: avoid;
+  margin: 0; max-width: 240px; width:100%;
+  background:#fff;
+  padding: 8px 8px 20px;
+  border-radius: 8px;
+  box-shadow: 0 12px 26px rgba(180,120,180,0.22);
+  transform: rotate(var(--r, 0deg));
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.dc-item-solo-wrap .dc-item:hover{ transform: rotate(0deg) scale(1.04); box-shadow: 0 18px 38px rgba(180,120,180,0.32); }
+.dc-item-solo-wrap .dc-item img{ width:100%; display:block; border-radius:2px; }
+.dc-item-solo-wrap .dc-caption{
+  display:block; text-align:center; margin-top:7px;
+  font-family:'Cormorant Garamond', serif; font-style:italic;
+  color: var(--ink-soft); font-size:0.82rem;
+}
+
+/* Tarjeta decorativa del tulipán (scroll reveal) */
+.tulip-card{
+  max-width: 380px; margin: 1rem auto 0;
+  background: linear-gradient(160deg, #fff 0%, var(--pink-pale) 100%);
+  border-radius: 26px;
+  padding: 1.6rem 1.4rem 1.4rem;
+  box-shadow: 0 16px 40px rgba(230,90,150,0.18);
+  text-align:center;
+  opacity:0; transform: translateY(40px) rotate(-2deg);
+  transition: opacity .8s cubic-bezier(.22,1,.36,1), transform .8s cubic-bezier(.22,1,.36,1);
+  position:relative;
+}
+.tulip-card.in-view{ opacity:1; transform: translateY(0) rotate(-1.2deg); }
+.tulip-card .tulip-photo{ width:150px; max-width:60%; margin:0 auto; display:block; filter: drop-shadow(0 10px 18px rgba(210,90,140,0.28)); }
+.tulip-caption{
+  font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--pink-strong);
+  font-size: clamp(1.05rem, 3vw, 1.3rem);
+  margin-top:0.6rem;
+  text-shadow: 0 2px 10px rgba(230,90,150,0.18);
+}
+.tulip-card .sparkle{
+  position:absolute; color: var(--gold); font-size:1rem;
+  animation: sparkleSpin 3s linear infinite;
+}
+.tulip-card .sparkle:nth-child(2){ top:10px; right:18px; animation-delay:.4s; }
+.tulip-card .sparkle:nth-child(3){ bottom:16px; left:14px; animation-delay:1s; font-size:0.8rem; }
+@keyframes sparkleSpin{ 0%{ transform: rotate(0) scale(1); } 50%{ transform: rotate(180deg) scale(1.3);} 100%{ transform: rotate(360deg) scale(1);} }
+
+/* ── NOSOTROS — línea de tiempo ── */
+.timeline{
+  max-width: 640px; margin: 0 auto;
+  position:relative;
+  padding-left: 2.6rem;
+  counter-reset: momento;
+}
+.timeline::before{
+  content:''; position:absolute; left: 9px; top:6px; bottom:6px; width:3px;
+  background: linear-gradient(180deg, var(--pink), var(--purple));
+  border-radius:4px;
+}
+.tl-item{
+  position:relative; margin-bottom: 2.6rem;
+  opacity:0; transform: translateX(-24px);
+  transition: opacity .7s ease, transform .7s ease;
+  counter-increment: momento;
+}
+.tl-item:last-child{ margin-bottom: 0.4rem; }
+.tl-item.in-view{ opacity:1; transform:none; }
+.tl-item::before{
+  content: counter(momento);
+  position:absolute; left:-2.62rem; top:2px;
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Playfair Display', serif; font-weight:700; font-size:0.8rem; color:#fff;
+  background: radial-gradient(circle, var(--pink-strong), var(--purple-deep));
+  box-shadow: 0 0 0 4px #fff, 0 4px 10px var(--shadow-pink);
+  z-index:2;
+}
+.tl-kicker{
+  display:inline-block;
+  font-family:'Cormorant Garamond', serif; font-style:italic; font-size:0.78rem;
+  letter-spacing:0.08em; text-transform:uppercase;
+  color: var(--pink-strong);
+  background: var(--pink-pale);
+  padding: 0.15rem 0.6rem; border-radius: 20px;
+  margin-bottom: 0.3rem;
+}
+.tl-date{
+  font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--purple-deep); font-size:1.02rem; letter-spacing:0.03em;
+  margin-bottom: 0.5rem;
+}
+.tl-card{
+  display:flex; gap:1.1rem; align-items:center;
+  background:#fff; border-radius:20px; padding:0.9rem;
+  box-shadow: 0 10px 26px rgba(180,120,180,0.12);
+  flex-wrap:wrap;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.tl-card:hover{
+  transform: translateY(-4px);
+  box-shadow: 0 16px 34px rgba(180,120,180,0.2);
+}
+.tl-card img{
+  width:100px; height:100px; object-fit:cover; border-radius:14px;
+  border: 3px solid var(--pink-pale);
+  flex-shrink:0;
+}
+.tl-text{ flex:1; min-width:160px; }
+.tl-text h4{
+  font-family:'Playfair Display', serif; font-size:1.08rem; color:var(--ink); margin-bottom:0.3rem;
+}
+.tl-text p{ color: var(--ink-soft); font-size:0.98rem; line-height:1.45; }
+@media (max-width: 480px){
+  .timeline{ padding-left: 2.1rem; }
+  .tl-item::before{ left:-2.12rem; width:22px; height:22px; font-size:0.7rem; }
+  .tl-card img{ width:84px; height:84px; }
+}
+
+/* ── GALLERY — recuerditos en video + carrusel de fotos ── */
+.gallery-wrap{ max-width: 1000px; margin:0 auto; }
+.polaroid-field{
+  position:relative;
+  display:flex; flex-wrap:wrap; justify-content:center; gap: 1.8rem 1.4rem;
+  padding: 1rem 0 2.6rem;
+}
+.polaroid{
+  width: 190px;
+  background:#fff;
+  border-radius: 10px;
+  padding: 10px 10px 38px;
+  box-shadow: 0 14px 30px rgba(180,120,180,0.2);
+  transform: rotate(var(--r, -3deg));
+  animation: polaFloat 6s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+  transition: transform .35s ease, box-shadow .35s ease;
+  cursor:pointer;
+}
+.polaroid:hover{
+  transform: rotate(0deg) scale(1.06) translateY(-6px);
+  box-shadow: 0 20px 40px rgba(180,120,180,0.3);
+  z-index:5;
+}
+.polaroid .polaroid-media{
+  position:relative; width:100%; aspect-ratio: 3/4; border-radius:4px; overflow:hidden;
+  background:#1a1015;
+}
+.polaroid .polaroid-media img,
+.polaroid .polaroid-media video{ width:100%; height:100%; object-fit:cover; display:block; }
+.polaroid .play-badge{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  background: rgba(30,10,20,0.18);
+}
+.polaroid .play-badge::after{
+  content:''; width:0; height:0;
+  border-top: 11px solid transparent; border-bottom: 11px solid transparent;
+  border-left: 18px solid #fff; margin-left:4px;
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+.polaroid span{
+  display:block; text-align:center; margin-top:8px;
+  font-family:'Cormorant Garamond', serif; font-style:italic; color: var(--ink-soft);
+  font-size:0.9rem;
+}
+@keyframes polaFloat{
+  0%,100%{ transform: rotate(var(--r,-3deg)) translateY(0); }
+  50%{ transform: rotate(var(--r,-3deg)) translateY(-10px); }
+}
+
+.carousel-title{
+  text-align:center; font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--purple-deep); margin: 1.4rem 0 0.8rem; font-size:1.15rem;
+}
+.carousel{
+  display:flex; gap: 1.2rem; overflow-x:auto; scroll-snap-type: x mandatory;
+  padding: 0.6rem 1.4rem 1.6rem;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+.carousel::-webkit-scrollbar{ height:6px; }
+.carousel::-webkit-scrollbar-thumb{ background: var(--pink); border-radius:6px; }
+.carousel-item{
+  flex: 0 0 auto;
+  scroll-snap-align:center;
+  width: 260px; height: 340px;
+  border-radius:20px; overflow:hidden;
+  box-shadow: 0 14px 30px rgba(180,120,180,0.22);
+  position:relative;
+  cursor:pointer;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.carousel-item:hover{ transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 42px rgba(180,120,180,0.32); }
+.carousel-item img{ width:100%; height:100%; object-fit:cover; display:block; }
+.carousel-item .cap{
+  position:absolute; left:0; right:0; bottom:0;
+  padding: 14px 12px 10px;
+  background: linear-gradient(transparent, rgba(90,40,70,0.55));
+  color:#fff; font-family:'Cormorant Garamond', serif; font-style:italic;
+}
+@media (max-width: 480px){
+  .polaroid{ width:150px; }
+  .carousel-item{ width:210px; height:280px; }
+}
+
+/* ── LIGHTBOX (fotos y videos en grande) ── */
+.lightbox-overlay{
+  position:fixed; inset:0; z-index:999;
+  background: rgba(20,8,16,0.92);
+  display:flex; align-items:center; justify-content:center;
+  padding: 3.2rem 1rem 1rem;
+  opacity:0; visibility:hidden;
+  transition: opacity .3s ease, visibility .3s ease;
+}
+.lightbox-overlay.open{ opacity:1; visibility:visible; }
+.lightbox-overlay .lb-content{
+  max-width: min(92vw, 720px); max-height: 84vh;
+  display:flex; align-items:center; justify-content:center;
+  position:relative;
+}
+.lightbox-overlay img, .lightbox-overlay video{
+  max-width: 100%; max-height: 84vh;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  background:#000;
+}
+.lightbox-close{
+  position:absolute; top:1rem; right:1.2rem;
+  width:40px; height:40px; border-radius:50%;
+  background: rgba(255,255,255,0.15); color:#fff; border:none;
+  font-size:1.4rem; line-height:1; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: background .2s ease;
+}
+.lightbox-close:hover{ background: rgba(255,255,255,0.3); }
+.lightbox-nav{
+  position:absolute; top:50%; transform:translateY(-50%);
+  width:44px; height:44px; border-radius:50%;
+  background: rgba(255,255,255,0.15); color:#fff; border:none;
+  font-size:1.4rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  transition: background .2s ease;
+}
+.lightbox-nav:hover{ background: rgba(255,255,255,0.3); }
+.lightbox-nav.prev{ left: -1rem; }
+.lightbox-nav.next{ right: -1rem; }
+@media (max-width: 640px){
+  .lightbox-nav.prev{ left:0.2rem; }
+  .lightbox-nav.next{ right:0.2rem; }
+}
+
+/* ── CARTA — libro de páginas ── */
+#tab-carta{ background: linear-gradient(180deg, var(--white), var(--pink-pale)); }
+
+.carta-book{ max-width:600px; margin:0 auto; position:relative; padding: 34px 12px 6px; }
+
+.carta-corner-deco{ position:absolute; pointer-events:none; z-index:2; filter: drop-shadow(0 8px 18px var(--shadow-pink)); }
+.carta-corner-deco.tl{ top:-8px; left:-16px; width:clamp(72px,20vw,120px); transform: rotate(-18deg); }
+.carta-corner-deco.br{ bottom:-6px; right:-18px; width:clamp(78px,22vw,132px); transform: rotate(16deg) scaleX(-1); }
+.carta-corner-deco.tr-mini{ top:0; right:8px; width:clamp(34px,9vw,50px); opacity:0.85; transform: rotate(22deg); z-index:1; }
+.carta-corner-deco.bl-mini{ bottom:0; left:6px; width:clamp(30px,8vw,46px); opacity:0.85; transform: rotate(-18deg); z-index:1; }
+@media (max-width:480px){
+  .carta-book{ padding: 26px 6px 4px; }
+}
+
+.carta-frame{
+  position:relative; overflow:hidden; border-radius:26px;
+  padding: clamp(1.7rem,4.5vw,2.6rem) clamp(1.3rem,4vw,2.2rem);
+  background: linear-gradient(180deg, #fffefc 0%, #fff6f1 100%);
+  box-shadow: 0 20px 50px rgba(230,90,150,0.18), inset 0 0 0 1px rgba(220,160,190,0.35), inset 0 0 0 5px rgba(255,255,255,0.55);
+}
+.carta-frame::before{
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image: repeating-linear-gradient(to bottom, transparent, transparent 30px, rgba(212,150,180,0.14) 31px);
+}
+.carta-frame::after{
+  content:''; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image:url('decor/lily-watercolor.png');
+  background-repeat:no-repeat; background-position:center 55%; background-size:55% auto;
+  opacity:0.06;
+}
+
+.carta-viewport{ position:relative; z-index:1; perspective:1400px; min-height: clamp(230px,42vh,340px); }
+
+.carta-page{
+  transform-origin:center center; backface-visibility:hidden;
+  transition: transform .38s cubic-bezier(.5,.05,.25,1), opacity .32s ease;
+}
+.carta-page.flip-visible{ transform: rotateY(0deg); opacity:1; }
+.carta-page.flip-exit-left, .carta-page.flip-enter-left{ transform: rotateY(-90deg); opacity:0; }
+.carta-page.flip-exit-right, .carta-page.flip-enter-right{ transform: rotateY(90deg); opacity:0; }
+
+.carta-date{
+  text-align:center; font-family:'DM Serif Display', serif; font-style:italic;
+  color: var(--gold); font-size:0.88rem; letter-spacing:0.03em; margin-bottom:1rem;
+}
+
+.carta-controls{ display:flex; align-items:center; justify-content:center; gap:1.1rem; margin-top:1.5rem; }
+.carta-nav-btn{
+  width:46px; height:46px; border-radius:50%; border:none; cursor:pointer; flex-shrink:0;
+  font-size:1.15rem; color:#fff; display:flex; align-items:center; justify-content:center;
+  background: linear-gradient(135deg, var(--pink-strong), var(--purple-deep));
+  box-shadow: 0 8px 18px var(--shadow-pink);
+  transition: transform .18s ease, opacity .18s ease, box-shadow .18s ease;
+}
+.carta-nav-btn:hover:not(:disabled){ transform: translateY(-2px) scale(1.06); box-shadow: 0 12px 24px var(--shadow-pink); }
+.carta-nav-btn:active:not(:disabled){ transform: scale(0.94); }
+.carta-nav-btn:disabled{ opacity:0.3; cursor:default; box-shadow:none; }
+
+.carta-progress{ display:flex; flex-direction:column; align-items:center; gap:0.4rem; min-width:110px; }
+.carta-progress-text{ font-family:'DM Serif Display', serif; font-style:italic; color: var(--ink-soft); font-size:0.95rem; }
+.carta-progress-track{ width:100px; height:5px; border-radius:999px; background: rgba(220,160,190,0.25); overflow:hidden; }
+.carta-progress-fill{ height:100%; border-radius:999px; background: linear-gradient(90deg, var(--pink-mid), var(--pink-strong)); transition: width .4s ease; }
+
+.carta-hint{ text-align:center; margin-top:0.9rem; font-size:0.82rem; font-style:italic; color: var(--ink-soft); opacity:0.75; }
+@media (min-width:720px){ .carta-hint{ display:none; } }
+
+.letter-for{
+  text-align:right; font-style:italic; color: var(--ink-soft);
+  border-bottom: 1px solid rgba(220,160,190,0.35); padding-bottom:0.7rem; margin-bottom:1rem;
+}
+.letter-for span{ color: var(--pink-strong); font-family:'DM Serif Display', serif; }
+.letter-greeting{
+  font-family:'DM Serif Display', serif; font-style:italic; color:var(--pink-strong);
+  margin-bottom:0.9rem; font-size: clamp(1.2rem,3vw,1.45rem);
+}
+.letter-body p{
+  font-size: clamp(1rem,2.4vw,1.1rem); line-height:1.85; margin-bottom:0.8rem; color: var(--ink);
+}
+.letter-divider{ text-align:center; color: var(--pink); letter-spacing:0.4rem; margin:0.6rem 0; }
+.letter-closing{ text-align:right; margin-top:0.6rem; }
+.letter-with-love{ font-style:italic; color: var(--ink-soft); }
+.letter-signature{
+  font-family:'DM Serif Display', serif; font-style:italic; color: var(--pink-strong);
+  font-size: clamp(1.5rem,4vw,2rem);
+  animation: heartbeat 2.8s ease-in-out infinite;
+}
+@keyframes heartbeat{ 0%,100%{transform:scale(1);} 20%{transform:scale(1.06);} 40%{transform:scale(1);} }
+.letter-ps{ color: var(--gold); font-style:italic; margin-top:0.4rem; }
+
+/* ── VLOG ── */
+.vlog-main-card, .vlog-sub-card{
+  max-width: 560px; margin: 0 auto 1.8rem;
+  background: linear-gradient(160deg, #fff, var(--purple-pale));
+  border-radius: 26px; padding: clamp(1.5rem,4vw,2.2rem) clamp(1.2rem,4vw,1.8rem);
+  text-align:center;
+  box-shadow: 0 16px 40px rgba(150,100,200,0.18);
+}
+.vlog-sub-card{ margin-bottom:0; }
+.vlog-main-card h3, .vlog-sub-card h3{
+  font-family:'DM Serif Display', serif; font-style:italic; color: var(--purple-deep);
+  margin-bottom: 0.4rem; font-size:1.3rem;
+}
+.vlog-main-card p, .vlog-sub-card p{ color: var(--ink-soft); margin-bottom:1.1rem; font-size:1rem; }
+.vlog-video{
+  width:100%; display:block; border-radius:18px;
+  box-shadow: 0 10px 28px rgba(150,100,200,0.28);
+  background:#000;
+}
+.vlog-main-wrap{ position:relative; border-radius:18px; overflow:hidden; }
+.vlog-video-placeholder{
+  position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
+  gap:0.4rem; padding:1.5rem; text-align:center;
+  background: linear-gradient(160deg, var(--purple-pale), var(--pink-pale));
+  border-radius:18px;
+}
+.vlog-video-placeholder.show{ display:flex; }
+.vlog-placeholder-icon{ font-size:2.4rem; margin-bottom:0.2rem; }
+.vlog-video-placeholder p{ margin:0; color: var(--ink); font-style:italic; }
+.vlog-placeholder-sub{ font-size:0.85rem; color: var(--ink-soft) !important; max-width:320px; }
+.vlog-placeholder-sub code{
+  background: rgba(255,255,255,0.6); padding:0.1rem 0.4rem; border-radius:6px;
+  font-style:normal; color: var(--pink-strong); font-size:0.8rem;
+}
+.vlog-note{
+  margin-top:1.4rem; padding-top:1rem; border-top: 1px dashed var(--purple);
+  color: var(--ink-soft); font-style:italic; font-size:0.92rem;
+}
+
+/* footer petals canvas (ambient, home only) */
+.petal-canvas{ position:absolute; top:0; left:0; width:100%; pointer-events:none; z-index:0; }
+
+@media (max-width:520px){
+  .tl-card{ flex-direction:column; text-align:center; }
+  .tl-card img{ width:100%; height:150px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ CORAZÓN DE BIENVENIDA ══ -->
+<div id="heart-intro" onclick="goToLock()">
+  <img class="entry-deco peony" src="decor/peony.png" alt="" aria-hidden="true">
+  <img class="entry-deco rose" src="decor/rose.png" alt="" aria-hidden="true">
+  <img class="entry-deco cloud-mid" src="decor/cloud-pink.png" alt="" aria-hidden="true">
+  <img class="entry-deco lirio" src="decor/lirio.png" alt="" aria-hidden="true">
+  <img class="entry-deco lily-real" src="decor/lily-real.png" alt="" aria-hidden="true">
+  <img class="entry-deco lily-water" src="decor/lily-watercolor.png" alt="" aria-hidden="true">
+  <canvas class="ambient-hearts-canvas" id="intro-hearts-canvas"></canvas>
+  <div class="love-sparkles" id="intro-sparkles"></div>
+  <p class="lock-tagline">Con todo cariño para ti<span class="coeur">Mon Cœur</span></p>
+  <div id="intro-heart-stage">
+    <canvas id="intro-heart-canvas"></canvas>
+  </div>
+  <p class="intro-hint">presióname ♥</p>
+</div>
+
+<!-- ══ CANDADO ══ -->
+<div id="lock-screen">
+  <img class="entry-deco peony" src="decor/peony.png" alt="" aria-hidden="true">
+  <img class="entry-deco rose" src="decor/rose.png" alt="" aria-hidden="true">
+  <img class="entry-deco cloud-mid" src="decor/cloud-pink.png" alt="" aria-hidden="true">
+  <img class="entry-deco lirio" src="decor/lirio.png" alt="" aria-hidden="true">
+  <img class="entry-deco lily-real" src="decor/lily-real.png" alt="" aria-hidden="true">
+  <img class="entry-deco lily-water" src="decor/lily-watercolor.png" alt="" aria-hidden="true">
+  <canvas class="ambient-hearts-canvas" id="lock-hearts-canvas"></canvas>
+  <div class="love-sparkles" id="lock-sparkles"></div>
+
+  <p class="lock-tagline">Con todo cariño para ti<span class="coeur">Mon Cœur</span></p>
+
+  <div id="padlock-wrap" onclick="onPadlockClick()">
+    <div id="padlock-glow"></div>
+    <img class="padlock-img" id="padlock-img" src="lock/candado.png" alt="Candado en forma de corazón" draggable="false">
+  </div>
+
+  <p class="lock-hint" id="lock-hint">tócame ♥</p>
+
+  <div id="lock-form">
+    <p class="lock-question">¿Qué fecha es hoy?</p>
+    <input id="lock-input" type="text" inputmode="numeric" placeholder="DD/MM/AAAA" maxlength="10" autocomplete="off"/>
+    <button id="lock-submit" onclick="checkPassword()">Abrir ✨</button>
+    <p class="lock-error" id="lock-error"></p>
+  </div>
+</div>
+
+<canvas id="rose-canvas"></canvas>
+
+<!-- ══ SITIO ══ -->
+<div id="site">
+
+  <audio id="bg-music" src="audio/besame.mp3" loop preload="auto"></audio>
+  <div class="music-widget" id="music-widget">
+    <div class="music-volume-pop" id="music-volume-pop">
+      <input type="range" id="music-volume-slider" min="0" max="100" value="55" aria-label="Volumen de la música">
+    </div>
+    <div class="music-buttons">
+      <button class="music-expand-handle" onclick="toggleVolumePop(event)" aria-label="Mostrar control de volumen" title="Volumen">🔊</button>
+      <button id="music-toggle" onclick="toggleBgMusic()" aria-label="Silenciar música" title="Silenciar música">♪</button>
+    </div>
+  </div>
+
+  <nav id="main-nav">
+    <div id="nav-pill">
+      <button class="nav-btn active" data-tab="home" onclick="goTab('home')">Home</button>
+      <button class="nav-btn" data-tab="nosotros" onclick="goTab('nosotros')">Nosotros</button>
+      <button class="nav-btn" data-tab="gallery" onclick="goTab('gallery')">Gallery</button>
+      <button class="nav-btn" data-tab="carta" onclick="goTab('carta')">Carta</button>
+      <button class="nav-btn" data-tab="vlog" onclick="goTab('vlog')">Vlog</button>
+    </div>
+  </nav>
+
+  <!-- ══ HOME ══ -->
+  <section id="tab-home" class="tab-section active">
+    <img class="decor-cloud top-left" src="decor/cloud-flat.png" alt="" aria-hidden="true">
+    <img class="decor-cloud top-right" src="decor/cloud-soft.png" alt="" aria-hidden="true">
+    <canvas id="home-petal-canvas" class="petal-canvas"></canvas>
+
+    <h1 class="section-title">Con todo cariño para ti</h1>
+    <p class="section-sub">Mon Cœur ✿</p>
+
+    <div id="heart-stage">
+      <canvas id="heart-canvas"></canvas>
+    </div>
+
+    <div class="home-flowers-row">
+      <img class="lf-cherry" src="" alt="">
+      <img class="lf-peony" src="" alt="">
+      <img class="lf-hibiscus" src="" alt="">
+    </div>
+
+    <p class="home-collage-title">Nuestros momentos ♡</p>
+    <div class="home-collage">
+      <div class="hc-item" style="--r:-6deg;"><img src="photos/photo3.jpeg" alt="Recuerdo" loading="lazy"></div>
+      <div class="hc-item" style="--r:4deg;"><img src="photos/photo1.jpeg" alt="Recuerdo" loading="lazy"></div>
+      <div class="hc-item" style="--r:-3deg;"><img src="gallery-photos/g4.jpeg" alt="Recuerdo" loading="lazy"></div>
+      <div class="hc-item" style="--r:5deg;"><img src="gallery-photos/g11.jpeg" alt="Recuerdo" loading="lazy"></div>
+      <div class="hc-item" style="--r:-4deg;"><img src="gallery-photos/g18.jpeg" alt="Recuerdo" loading="lazy"></div>
+    </div>
+
+    <p class="details-title">Detalles que nos hemos dado ♡</p>
+    <p class="details-sub">Cada cartica, cada regalito, cada detalle</p>
+    <div class="detail-scrapbook" id="detail-scrapbook">
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/tulip-real.jpeg" alt="Tulipán dibujado">
+        <span class="dc-caption">Con cariño, Mon cœur</span>
+      </div>
+      <div class="dc-item" style="--r:4deg;">
+        <img src="details/barquito.jpeg" alt="Barquito de madera">
+        <span class="dc-caption">Nuestro barquito ⛵</span>
+      </div>
+      <div class="dc-item" style="--r:-5deg;">
+        <img src="details/carta1.jpeg" alt="Carta querida Leila">
+        <span class="dc-caption">Querida Leila</span>
+      </div>
+      <div class="dc-item" style="--r:3deg;">
+        <img src="details/flores1.jpeg" alt="Flores">
+      </div>
+      <div class="dc-item" style="--r:-4deg;">
+        <img src="details/elefante.jpeg" alt="Elefante rosado">
+        <span class="dc-caption">Elefantito ✿</span>
+      </div>
+      <div class="dc-item" style="--r:-4deg;">
+        <img src="details/snoopy-popup.jpeg" alt="Tarjeta pop-up Snoopy">
+        <span class="dc-caption">I love you</span>
+      </div>
+      <div class="dc-item" style="--r:5deg;">
+        <img src="details/carta2.jpeg" alt="Carta Cinco">
+        <span class="dc-caption">Cinco</span>
+      </div>
+      <div class="dc-item" style="--r:-2deg;">
+        <img src="details/spider-corazon.jpeg" alt="Spiderman en corazón">
+      </div>
+      <div class="dc-item" style="--r:4deg;">
+        <img src="details/envelope1.jpeg" alt="Sobre ábreme">
+        <span class="dc-caption">Ábreme ♡</span>
+      </div>
+      <div class="dc-item" style="--r:-6deg;">
+        <img src="details/flores2.jpeg" alt="Flores">
+      </div>
+      <div class="dc-item" style="--r:5deg;">
+        <img src="details/carta7.jpeg" alt="Carta Tengo ganas de ti">
+        <span class="dc-caption">Tengo ganas de ti...</span>
+      </div>
+      <div class="dc-item" style="--r:3deg;">
+        <img src="details/carta3.jpeg" alt="Carta 1+1=2">
+        <span class="dc-caption">1 + 1 = 2</span>
+      </div>
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/snoopy.jpeg" alt="Snoopy">
+      </div>
+      <div class="dc-item" style="--r:5deg;">
+        <img src="details/spider-besos.jpeg" alt="Spiderman con besos">
+        <span class="dc-caption">Picos pa' ti</span>
+      </div>
+      <div class="dc-item" style="--r:-4deg;">
+        <img src="details/carta4.jpeg" alt="Carta Basorexia">
+        <span class="dc-caption">Basorexia</span>
+      </div>
+      <div class="dc-item" style="--r:2deg;">
+        <img src="details/pescy.jpeg" alt="Pescy">
+        <span class="dc-caption">Pescy 🐟</span>
+      </div>
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/envelope4-front.jpeg" alt="Sobre N+L">
+      </div>
+      <div class="dc-item" style="--r:-5deg;">
+        <img src="details/envelope2.jpeg" alt="Sobre collar dibujado">
+      </div>
+      <div class="dc-item" style="--r:4deg;">
+        <img src="details/snoopy-manilla.jpeg" alt="Snoopy con manilla">
+      </div>
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/cartas-expuestas.jpeg" alt="Cartas expuestas">
+        <span class="dc-caption">Todas juntas</span>
+      </div>
+      <div class="dc-item" style="--r:3deg;">
+        <img src="details/spider-3d.jpeg" alt="Spiderman 3D">
+      </div>
+      <div class="dc-item" style="--r:-4deg;">
+        <img src="details/snoopy-pescy.jpeg" alt="Snoopy y Pescy">
+      </div>
+      <div class="dc-item" style="--r:5deg;">
+        <img src="details/carta5.jpeg" alt="Snoopy y dibujo de ojo">
+      </div>
+      <div class="dc-item" style="--r:4deg;">
+        <img src="details/envelope4-back.jpeg" alt="Sobre Mon Coeur">
+        <span class="dc-caption">Mon Cœur</span>
+      </div>
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/wallpaper2.jpeg" alt="Fondo de pantalla con foto de ambos">
+        <span class="dc-caption">Fondo de pantalla ✿</span>
+      </div>
+      <div class="dc-item" style="--r:-5deg;">
+        <img src="details/flores3.jpeg" alt="Flores">
+      </div>
+      <div class="dc-item" style="--r:3deg;">
+        <img src="details/snoopy-selfie.jpeg" alt="Selfie con Snoopy">
+      </div>
+      <div class="dc-item" style="--r:-4deg;">
+        <img src="details/pinkie-escritorio.jpeg" alt="Pinkie Pie en el escritorio">
+        <span class="dc-caption">Pinkie Pie ya vive aquí 🌸</span>
+      </div>
+      <div class="dc-item" style="--r:5deg;">
+        <img src="details/pinkie-audifonos.jpeg" alt="Pinkie Pie con audífonos">
+      </div>
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/snoopy-y-pinkie.jpeg" alt="Snoopy y Pinkie Pie juntos">
+        <span class="dc-caption">Snoopy la cuida por mí</span>
+      </div>
+      <div class="dc-item" style="--r:4deg;">
+        <img src="details/todo-listo.jpeg" alt="Todo listo para el regalo">
+        <span class="dc-caption">Todo listo para ti ♡</span>
+      </div>
+    </div>
+
+    <div class="dc-item-solo-wrap">
+      <div class="dc-item" style="--r:-3deg;">
+        <img src="details/wallpaper1.jpeg" alt="Pantallas con playlist y foto" loading="lazy">
+        <span class="dc-caption">Nuestra playlist ♫</span>
+      </div>
+    </div>
+
+    <div class="tulip-card" id="tulip-card">
+      <span class="sparkle">✦</span><span class="sparkle">✧</span><span class="sparkle">⋆</span>
+      <img class="tulip-photo" src="decor/tulip-bouquet.png" alt="Ramo de tulipanes">
+      <p class="tulip-caption">Con cariño,<br>Mon cœur ♡</p>
+    </div>
+    <img class="decor-flourish" src="decor/duo-corazon.png" alt="" aria-hidden="true">
+  </section>
+
+  <!-- ══ NOSOTROS ══ -->
+  <section id="tab-nosotros" class="tab-section">
+    <img class="decor-cloud center-top" src="decor/cloud-soft.png" alt="" aria-hidden="true">
+    <canvas id="nosotros-petal-canvas" class="petal-canvas"></canvas>
+    <h2 class="section-title">Nosotros</h2>
+    <p class="section-sub">Nuestra pequeña línea de tiempo</p>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 1 de 11</span>
+        <p class="tl-date">Primera foto</p>
+        <div class="tl-card">
+          <img src="photos/photo1.jpeg" alt="Primera foto juntos, segundo piso de la Universidad">
+          <div class="tl-text">
+            <h4>En el segundo piso de la Universidad</h4>
+            <p>Todo empezó con una mirada y una conversación que no quería terminar. 🌸</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 2 de 11</span>
+        <p class="tl-date">Segunda vez, en tu casa</p>
+        <div class="tl-card">
+          <img src="photos/photo2.jpeg" alt="Segunda vez que nos vimos, en su casa">
+          <div class="tl-text">
+            <h4>Aún me daban nervios visitarte</h4>
+            <p>Nervios, risas y la sensación de que algo lindo estaba empezando. 💛</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 3 de 11</span>
+        <p class="tl-date">Nuestro primer date real</p>
+        <div class="tl-card">
+          <img src="photos/photo3.jpeg" alt="Primer date real, muchas fotos juntos">
+          <div class="tl-text">
+            <h4>Juntos, y muchísimas fotos</h4>
+            <p>Solo tú y yo, descubriendo que nos gustaba cada minuto juntos. ♡</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 4 de 11</span>
+        <p class="tl-date">Momentos especiales</p>
+        <div class="tl-card">
+          <img src="photos/photo4.jpeg" alt="Momento especial, un beso">
+          <div class="tl-text">
+            <h4>Muakk 💋</h4>
+            <p>No parábamos de tomar fotos, queríamos guardar cada segundo.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 5 de 11</span>
+        <p class="tl-date">Primera vez en el cine</p>
+        <div class="tl-card">
+          <img src="photos/photo5.jpeg" alt="Primera vez en el cine viendo Mon Cœur">
+          <div class="tl-text">
+            <h4>Mon Cœur</h4>
+            <p>No le prestamos mucha atención a la película... estábamos muy ocupados mirándonos. 🎬</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 6 de 11</span>
+        <p class="tl-date">Cuando volvimos a vernos</p>
+        <div class="tl-card">
+          <img src="photos/photo6.jpeg" alt="Viendo la película La Odisea">
+          <div class="tl-text">
+            <h4>Vimos la Odisea</h4>
+            <p>Comer algo rico y ver una peli juntos fue el mejor plan del mundo.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 7 de 11</span>
+        <p class="tl-date">Mua mua</p>
+        <div class="tl-card">
+          <img src="photos/photo7.jpeg" alt="Momento tierno juntos">
+          <div class="tl-text">
+            <h4>Mon Cœur</h4>
+            <p>Solo tú y yo, sin necesitar nada más para ser felices.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 8 de 11</span>
+        <p class="tl-date">Sueñito</p>
+        <div class="tl-card">
+          <img src="photos/photo8.jpeg" alt="Momento tranquilo y acaramelado">
+          <div class="tl-text">
+            <h4>Muy empalagosos</h4>
+            <p>No queríamos despegarnos ni un segundo el uno del otro.</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 9 de 11</span>
+        <p class="tl-date">Sesión de fotos</p>
+        <div class="tl-card">
+          <img src="photos/photo9.jpeg" alt="Sesión de muchas fotos juntos">
+          <div class="tl-text">
+            <h4>Muchísimas fotos</h4>
+            <p>Nos tomamos demasiadas y al final solo nos gustó el video. 😂</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 10 de 11</span>
+        <p class="tl-date">Bleeeh</p>
+        <div class="tl-card">
+          <img src="photos/photo10.jpeg" alt="Un beso más, cerrando el recorrido">
+          <div class="tl-text">
+            <h4>Nos pelamos los labios</h4>
+            <p>Teníamos muchas ganas de estar así, los dos solos, sin pensar en nada más. ♡</p>
+          </div>
+        </div>
+      </div>
+      <div class="tl-item">
+        <span class="tl-kicker">Momento 11 de 11</span>
+        <p class="tl-date">En la Universidad</p>
+        <div class="tl-card">
+          <img src="photos/photo11.jpeg" alt="Juntos en la Universidad combinando outfit">
+          <div class="tl-text">
+            <h4>Combinamos sin querer</h4>
+            <p>Estábamos juntos en la Universidad y terminamos combinando outfit sin haberlo planeado. ✿</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Para personalizar: cambia las fechas (tl-date) y los textos (tl-text) por sus recuerdos reales -->
+    <img class="decor-flourish small flip" src="decor/cloud-flat.png" alt="" aria-hidden="true">
+  </section>
+
+  <!-- ══ GALLERY ══ -->
+  <section id="tab-gallery" class="tab-section">
+    <img class="decor-cloud top-left" src="decor/cloud-glitter.png" alt="" aria-hidden="true">
+    <canvas id="gallery-petal-canvas" class="petal-canvas"></canvas>
+    <h2 class="section-title">Gallery</h2>
+    <p class="section-sub">Recuerditos flotando ♡</p>
+
+    <div class="gallery-wrap">
+      <div class="polaroid-field">
+        <div class="polaroid" style="--r:-6deg; --d:0s;" onclick="openLightbox('video',0)">
+          <div class="polaroid-media">
+            <img src="videos/v1-poster.jpg" alt="Video 1" loading="lazy">
+            <div class="play-badge"></div>
+          </div>
+          <span>awww 🥰</span>
+        </div>
+        <div class="polaroid" style="--r:4deg; --d:.6s;" onclick="openLightbox('video',1)">
+          <div class="polaroid-media">
+            <img src="videos/v2-poster.jpg" alt="Video 2" loading="lazy">
+            <div class="play-badge"></div>
+          </div>
+          <span>💛</span>
+        </div>
+        <div class="polaroid" style="--r:-3deg; --d:1.1s;" onclick="openLightbox('video',2)">
+          <div class="polaroid-media">
+            <img src="videos/v3-poster.jpg" alt="Video 3" loading="lazy">
+            <div class="play-badge"></div>
+          </div>
+          <span>juntos ♡</span>
+        </div>
+        <div class="polaroid" style="--r:7deg; --d:1.7s;" onclick="openLightbox('video',3)">
+          <div class="polaroid-media">
+            <img src="videos/v4-poster.jpg" alt="Video 4" loading="lazy">
+            <div class="play-badge"></div>
+          </div>
+          <span>mua mua 🎬</span>
+        </div>
+        <div class="polaroid" style="--r:-5deg; --d:.3s;" onclick="openLightbox('video',4)">
+          <div class="polaroid-media">
+            <img src="videos/v5-poster.jpg" alt="Video 5" loading="lazy">
+            <div class="play-badge"></div>
+          </div>
+          <span>mi favorito ✨</span>
+        </div>
+      </div>
+
+      <p class="carousel-title">Foticos</p>
+      <div class="carousel" id="photo-carousel">
+        <div class="carousel-item" onclick="openLightbox('photo',0)"><img src="gallery-photos/g1.jpeg" alt="Recuerdo 1" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',1)"><img src="gallery-photos/g2.jpeg" alt="Recuerdo 2" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',2)"><img src="gallery-photos/g3.jpeg" alt="Recuerdo 3" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',3)"><img src="gallery-photos/g4.jpeg" alt="Recuerdo 4" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',4)"><img src="gallery-photos/g5.jpeg" alt="Recuerdo 5" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',5)"><img src="gallery-photos/g6.jpeg" alt="Recuerdo 6" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',6)"><img src="gallery-photos/g7.jpeg" alt="Recuerdo 7" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',7)"><img src="gallery-photos/g8.jpeg" alt="Recuerdo 8" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',8)"><img src="gallery-photos/g9.jpeg" alt="Recuerdo 9" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',9)"><img src="gallery-photos/g10.jpeg" alt="Recuerdo 10" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',10)"><img src="gallery-photos/g11.jpeg" alt="Recuerdo 11" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',11)"><img src="gallery-photos/g12.jpeg" alt="Recuerdo 12" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',12)"><img src="gallery-photos/g13.jpeg" alt="Recuerdo 13" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',13)"><img src="gallery-photos/g14.jpeg" alt="Recuerdo 14" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',14)"><img src="gallery-photos/g15.jpeg" alt="Recuerdo 15" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',15)"><img src="gallery-photos/g16.jpeg" alt="Recuerdo 16" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',16)"><img src="gallery-photos/g17.jpeg" alt="Recuerdo 17" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',17)"><img src="gallery-photos/g18.jpeg" alt="Recuerdo 18" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',18)"><img src="gallery-photos/g19.jpeg" alt="Recuerdo 19" loading="lazy"></div>
+        <div class="carousel-item" onclick="openLightbox('photo',19)"><img src="gallery-photos/g20.jpeg" alt="Recuerdo 20" loading="lazy"></div>
+      </div>
+    </div>
+    <img class="decor-flourish" src="decor/cloud-soft.png" alt="" aria-hidden="true">
+  </section>
+
+  <!-- ══ LIGHTBOX ══ -->
+  <div class="lightbox-overlay" id="lightbox-overlay" onclick="if(event.target===this) closeLightbox()">
+    <button class="lightbox-nav prev" onclick="lbNav(-1)" aria-label="Anterior">‹</button>
+    <div class="lb-content" id="lb-content"></div>
+    <button class="lightbox-nav next" onclick="lbNav(1)" aria-label="Siguiente">›</button>
+    <button class="lightbox-close" onclick="closeLightbox()" aria-label="Cerrar">×</button>
+  </div>
+
+  <!-- ══ CARTA ══ -->
+  <section id="tab-carta" class="tab-section">
+    <img class="decor-hearts beside-title" src="decor/duo-corazon.png" alt="" aria-hidden="true">
+    <h2 class="section-title">Nuestra Carta</h2>
+    <p class="section-sub">Quince páginas, escritas de corazón y mente</p>
+
+    <div class="carta-book">
+      <img class="carta-corner-deco tl" src="decor/lirio.png" alt="">
+      <img class="carta-corner-deco br" src="decor/lily-watercolor.png" alt="">
+      <img class="carta-corner-deco tr-mini" src="decor/peony.png" alt="">
+      <img class="carta-corner-deco bl-mini" src="decor/rose.png" alt="">
+
+      <div class="carta-frame">
+        <div class="carta-viewport" id="carta-viewport" aria-live="polite"></div>
+      </div>
+
+      <div class="carta-controls">
+        <button class="carta-nav-btn prev" id="carta-prev-btn" onclick="cartaGo(-1)" aria-label="Página anterior">❮</button>
+        <div class="carta-progress">
+          <span class="carta-progress-text"><span id="carta-page-num">1</span> / <span id="carta-page-total">15</span></span>
+          <div class="carta-progress-track"><div class="carta-progress-fill" id="carta-progress-fill"></div></div>
+        </div>
+        <button class="carta-nav-btn next" id="carta-next-btn" onclick="cartaGo(1)" aria-label="Página siguiente">❯</button>
+      </div>
+      <p class="carta-hint">Desliza para pasar la página ✦</p>
+    </div>
+  </section>
+
+  <!-- ══ VLOG ══ -->
+  <section id="tab-vlog" class="tab-section">
+    <img class="decor-cloud top-right" src="decor/cloud-flat.png" alt="" aria-hidden="true">
+    <img class="decor-cloud bottom-left" src="decor/cloud-glitter.png" alt="" aria-hidden="true">
+    <canvas id="vlog-petal-canvas" class="petal-canvas"></canvas>
+    <h2 class="section-title">Vlog</h2>
+    <p class="section-sub">Nuestra propia película</p>
+
+    <div class="vlog-main-card">
+      <h3>Nuestro Vlog</h3>
+      <p>Así lo hice todo</p>
+      <div class="vlog-main-wrap" id="vlog-main-wrap">
+        <video id="vlog-main-video" class="vlog-video" controls playsinline poster="photos/photo5.jpeg">
+          <source src="videos/vlog-principal.mp4" type="video/mp4">
+        </video>
+        <div class="vlog-video-placeholder" id="vlog-main-placeholder">
+          <span class="vlog-placeholder-icon">🎬</span>
+          <p>Aquí va nuestro vlog principal</p>
+          <p class="vlog-placeholder-sub">En cuanto subas el video como <code>videos/vlog-principal.mp4</code>, aparecerá aquí solito ✨</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vlog-sub-card">
+      <h3>Nuestros momentos en fotos</h3>
+      <p>Una recopilación de recuerdos, foto a foto. ♡</p>
+      <video class="vlog-video" controls playsinline poster="videos/recopilacion-fotos-poster.jpg">
+        <source src="videos/recopilacion-fotos.mp4" type="video/mp4">
+      </video>
+    </div>
+  </section>
+
+</div>
+
+<script>
+// ════════════════════════════════════════
+//  IMÁGENES DE FLORES (compartidas)
+// ════════════════════════════════════════
+const FLOWER_IMGS = {};
+(function loadFlowers(){
+  const srcs = { cherry:'flowers/cherry.png', hibiscus:'flowers/hibiscus.png', peony:'flowers/peony.png', bow:'flowers/bow.png', heart:'lock/corazon-heart.png' };
+  Object.entries(srcs).forEach(([k, src]) => {
+    const img = new Image();
+    img.src = src;
+    FLOWER_IMGS[k] = img;
+  });
+})();
+
+function injectFlowerImgs(){
+  if (!FLOWER_IMGS.cherry || !FLOWER_IMGS.cherry.complete){ return setTimeout(injectFlowerImgs, 60); }
+  document.querySelectorAll('.lf-cherry').forEach(el => el.src = FLOWER_IMGS.cherry.src);
+  document.querySelectorAll('.lf-peony').forEach(el => el.src = FLOWER_IMGS.peony.src);
+  document.querySelectorAll('.lf-hibiscus').forEach(el => el.src = FLOWER_IMGS.hibiscus.src);
+}
+document.addEventListener('DOMContentLoaded', injectFlowerImgs);
+
+// ════════════════════════════════════════
+//  CORAZÓN DE BIENVENIDA → CANDADO
+// ════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  startHeartCanvas('intro-heart-canvas', 'intro-heart-stage');
+  startLoveSparkles('intro-sparkles', 16);
+  startAmbientHearts('intro-hearts-canvas');
+  startAmbientHearts('lock-hearts-canvas');
+  startLoveSparkles('lock-sparkles', 14);
+});
+
+function goToLock(){
+  document.getElementById('heart-intro').classList.add('hidden');
+  document.getElementById('lock-screen').classList.add('visible');
+}
+
+// ════════════════════════════════════════
+//  CANDADO — lógica de contraseña
+// ════════════════════════════════════════
+const CORRECT_DATE = '11/09/2026';
+let lockOpened = false;
+
+function onPadlockClick(){
+  const form = document.getElementById('lock-form');
+  const hint = document.getElementById('lock-hint');
+  if (form.classList.contains('open')) return;
+  form.classList.add('open');
+  hint.classList.add('hint-hidden');
+  document.getElementById('lock-input').focus();
+}
+
+function formatDateInput(el){
+  let v = el.value.replace(/[^0-9]/g, '').slice(0,8);
+  let out = v;
+  if (v.length > 4) out = v.slice(0,2) + '/' + v.slice(2,4) + '/' + v.slice(4);
+  else if (v.length > 2) out = v.slice(0,2) + '/' + v.slice(2);
+  el.value = out;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('lock-input');
+  input.addEventListener('input', () => formatDateInput(input));
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPassword(); });
+});
+
+// ════════════════════════════════════════
+//  MÚSICA DE FONDO
+// ════════════════════════════════════════
+function startBgMusic(){
+  const audio = document.getElementById('bg-music');
+  if (!audio) return;
+  audio.volume = 0.55;
+  const p = audio.play();
+  if (p && p.catch){ p.catch(() => {
+    // si el navegador bloquea el autoplay, intenta de nuevo en la primera interacción
+    const retry = () => { audio.play().catch(()=>{}); document.removeEventListener('click', retry); };
+    document.addEventListener('click', retry, { once:true });
+  }); }
+}
+function toggleBgMusic(){
+  const audio = document.getElementById('bg-music');
+  const btn = document.getElementById('music-toggle');
+  const slider = document.getElementById('music-volume-slider');
+  if (!audio) return;
+  if (audio.paused){
+    audio.play().catch(()=>{});
+    btn.classList.remove('muted'); btn.textContent = '♪';
+    if (slider && Number(slider.value) === 0){ slider.value = 55; audio.volume = 0.55; }
+  } else {
+    audio.pause();
+    btn.classList.add('muted'); btn.textContent = '🔇';
+  }
+}
+
+function toggleVolumePop(e){
+  if (e) e.stopPropagation();
+  document.getElementById('music-widget').classList.toggle('expanded');
+}
+document.addEventListener('click', (e) => {
+  const widget = document.getElementById('music-widget');
+  if (widget && !widget.contains(e.target)) widget.classList.remove('expanded');
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const slider = document.getElementById('music-volume-slider');
+  const audio = document.getElementById('bg-music');
+  const btn = document.getElementById('music-toggle');
+  if (!slider || !audio) return;
+  slider.addEventListener('input', () => {
+    const v = Number(slider.value) / 100;
+    audio.volume = v;
+    if (v === 0){
+      btn.classList.add('muted'); btn.textContent = '🔇';
+    } else {
+      if (audio.paused) audio.play().catch(()=>{});
+      btn.classList.remove('muted'); btn.textContent = '♪';
+    }
+  });
+});
+
+function checkPassword(){
+  if (lockOpened) return;
+  const input = document.getElementById('lock-input');
+  const error = document.getElementById('lock-error');
+  const wrap  = document.getElementById('padlock-wrap');
+
+  if (input.value.trim() === CORRECT_DATE){
+    lockOpened = true;
+    error.textContent = '';
+    wrap.classList.add('unlocking');
+    startBgMusic();
+    setTimeout(() => {
+      wrap.classList.add('opened');
+      startRoseExplosion();
+    }, 550);
+  } else {
+    error.textContent = 'Esa no es la fecha correcta… inténtalo de nuevo ♡';
+    wrap.classList.remove('shake');
+    void wrap.offsetWidth;
+    wrap.classList.add('shake');
+  }
+}
+
+// ════════════════════════════════════════
+//  EXPLOSIÓN DE ROSAS (canvas de partículas)
+// ════════════════════════════════════════
+function startRoseExplosion(){
+  const canvas = document.getElementById('rose-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.classList.add('active');
+
+  const cx = canvas.width/2, cy = canvas.height/2;
+  const keys = ['cherry','hibiscus','peony'];
+  const particles = [];
+
+  function mk(opts){
+    return Object.assign({
+      x: cx, y: cy, vx:0, vy:0, gravity:60, drag:0.985,
+      size:70, rot: Math.random()*Math.PI*2,
+      rotSpeed:(Math.random()-0.5)*4, alpha:0, targetAlpha:0.95,
+      fadeInSpd:3, delay:0, age:0, life:4.5, dead:false
+    }, opts);
+  }
+
+  // ── Estallido central (burst) ──
+  const BURSTS = [
+    { n:130, spd:[320,820], size:[40,115], life:[4.2,6.2], delayMax:0.16 },
+    { n:100, spd:[220,600], size:[50,135], life:[4.6,6.6], delayMax:0.36 },
+    { n:80,  spd:[130,400], size:[65,165], life:[5,7],     delayMax:0.6 },
+  ];
+  BURSTS.forEach(b => {
+    for (let i=0;i<b.n;i++){
+      const angle = (i/b.n)*Math.PI*2 + (Math.random()-0.5)*0.5;
+      const spd = b.spd[0] + Math.random()*(b.spd[1]-b.spd[0]);
+      const key = keys[Math.floor(Math.random()*keys.length)];
+      particles.push(mk({
+        vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+        size: b.size[0] + Math.random()*(b.size[1]-b.size[0]),
+        img: FLOWER_IMGS[key],
+        delay: Math.random()*b.delayMax,
+        life: b.life[0] + Math.random()*(b.life[1]-b.life[0]),
+        rotSpeed:(Math.random()-0.5)*5,
+      }));
+    }
+  });
+  // lazos decorativos
+  for (let i=0;i<8;i++){
+    const angle = (i/8)*Math.PI*2 + 0.5;
+    const spd = 200 + Math.random()*220;
+    particles.push(mk({
+      vx: Math.cos(angle)*spd, vy: Math.sin(angle)*spd,
+      size: 100 + Math.random()*70, img: FLOWER_IMGS.bow,
+      delay: i*0.1, life:6.2,
+    }));
+  }
+
+  // ── Lluvia continua que llena toda la pantalla ──
+  const RAIN_COUNT = 220;
+  for (let i=0;i<RAIN_COUNT;i++){
+    const key = keys[Math.floor(Math.random()*keys.length)];
+    const startX = Math.random()*canvas.width;
+    particles.push(mk({
+      x: startX, y: -80 - Math.random()*canvas.height*0.7,
+      vx: (Math.random()-0.5)*70,
+      vy: 60 + Math.random()*100,
+      gravity: 34 + Math.random()*26,
+      drag: 0.992,
+      size: 34 + Math.random()*90,
+      img: FLOWER_IMGS[key],
+      delay: Math.random()*2.6,
+      fadeInSpd: 2.2,
+      targetAlpha: 0.85 + Math.random()*0.15,
+      life: 6.5 + Math.random()*1.5,
+      rotSpeed:(Math.random()-0.5)*3.2,
+    }));
+  }
+
+  const SCENE_DURATION = 5.0;
+  const FADEOUT_START = 3.8;
+  let lastT = performance.now(), elapsed = 0;
+
+  function draw(ts){
+    const dt = Math.min((ts-lastT)*0.001, 0.05);
+    lastT = ts; elapsed += dt;
+
+    const grad = ctx.createRadialGradient(cx,cy,0,cx,cy, Math.max(canvas.width,canvas.height)*0.8);
+    grad.addColorStop(0, '#fff5fa');
+    grad.addColorStop(0.45, '#ffe0ee');
+    grad.addColorStop(1, '#f3d3ec');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    if (elapsed < 0.4){
+      const fa = Math.max(0, 0.6 - elapsed*1.5);
+      const fg = ctx.createRadialGradient(cx,cy,0,cx,cy,220);
+      fg.addColorStop(0, `rgba(255,255,255,${fa})`);
+      fg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = fg;
+      ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
+
+    const sceneAlpha = elapsed >= FADEOUT_START
+      ? Math.max(0, 1 - (elapsed-FADEOUT_START)/(SCENE_DURATION-FADEOUT_START))
+      : 1;
+
+    particles.forEach(p => {
+      if (p.dead) return;
+      p.age += dt;
+      if (p.age < p.delay) return;
+      const localAge = p.age - p.delay;
+      p.alpha = Math.min(p.targetAlpha, p.alpha + p.fadeInSpd*dt);
+      const alive = localAge < p.life-0.7 ? 1 : Math.max(0, (p.life-localAge)/0.7);
+      if (alive <= 0){ p.dead = true; return; }
+
+      p.vx *= Math.pow(p.drag, dt*60);
+      p.vy *= Math.pow(p.drag, dt*60);
+      p.vy += p.gravity*dt;
+      p.x += p.vx*dt; p.y += p.vy*dt;
+      p.rot += p.rotSpeed*dt;
+
+      if (!p.img || !p.img.complete || !p.img.naturalWidth) return;
+      const finalAlpha = p.alpha*alive*sceneAlpha;
+      const hw = p.size/2;
+      const hh = hw*(p.img.naturalHeight/p.img.naturalWidth);
+      ctx.save();
+      ctx.globalAlpha = finalAlpha;
+      ctx.shadowColor = 'rgba(220,80,140,0.25)';
+      ctx.shadowBlur = 16;
+      ctx.translate(p.x,p.y);
+      ctx.rotate(p.rot);
+      ctx.drawImage(p.img, -hw, -hh, p.size, hh*2);
+      ctx.restore();
+    });
+
+    if (elapsed < SCENE_DURATION){
+      requestAnimationFrame(draw);
+    } else {
+      canvas.classList.remove('active');
+      revealSite();
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+// ════════════════════════════════════════
+//  REVELAR SITIO
+// ════════════════════════════════════════
+function revealSite(){
+  document.getElementById('lock-screen').classList.add('hidden');
+  const site = document.getElementById('site');
+  site.classList.add('visible');
+  setTimeout(() => { startHeartCanvas('heart-canvas', 'heart-stage'); startHomePetals(); initScrollReveal(); }, 300);
+}
+
+// ════════════════════════════════════════
+//  NAVEGACIÓN POR PESTAÑAS
+// ════════════════════════════════════════
+function goTab(name){
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (name === 'home'){ setTimeout(initScrollReveal, 50); }
+  if (name === 'nosotros'){ setTimeout(() => startHomePetals('nosotros-petal-canvas'), 50); }
+  if (name === 'gallery'){ setTimeout(() => startHomePetals('gallery-petal-canvas'), 50); }
+  if (name === 'vlog'){ setTimeout(() => startHomePetals('vlog-petal-canvas'), 50); }
+}
+
+// ════════════════════════════════════════
+//  CARTA — libro de páginas con animación de paso
+// ════════════════════════════════════════
+const CARTA_PAGES = [
+  { greeting:true, paras:[
+    "Primero me fijé en ti cuando te me acercaste porque no tenías a alguien más cercano en clases. Después de estar molestando unos días y de que me insistieras en que te diera algo de cumpleaños, aunque fuera molestando, lo tomé en serio. Por eso quise darte un ramo, aunque no hablábamos más allá de las tareas. Recuerdo cuando lo encargué, porque ese día fui a Cali, pero antes de irme sabía que quería dejar eso listo. No me hizo falta tocarte para querer que se te quedara algo lindo en tu cumpleaños, por eso quise sorprenderte así, aunque no esperaba más de ahí."
+  ]},
+  { tag:"04 de abril", paras:[
+    "El cuatro de abril estaba en una finca y solo madrugué 15 minutos antes de las 9 para ver si te llegaba... sorpresa, me escribiste agradeciendo por eso.",
+    "Aún recuerdo el jueves en el que estaba decidiendo si invitarte a salir o no. Estábamos juntos en clase y aburridos, molestándonos el uno al otro. Te preguntaba si te dejaban salir y cómo hacías. A la final me decidí y te dije que saliéramos el día siguiente, pero que me escribieras si te dejaban o no."
+  ]},
+  { paras:[
+    "Cuando me disté el sí, decidí llamarte, aunque sé que en tu cabeza fue: \"no sabe escribir o qué\" jskjsksjs. Después de eso, al día siguiente estaba nervioso, diciéndome por qué lo hice, pero recuerdo muy bien que me dije: \"Dios, si ella vale la pena, por favor házmelo saber esta noche\".",
+    "¿Sabes qué es lo curioso? Que justo me dio la señal que necesitaba, porque esa noche solo recuerdo comer y reírme contigo. Esas pequeñas cosas, como reírnos y contarnos tonterías, montar en columpio y luego ver una orquesta y, para finalizar, montar en el carrito rosado. Para mí fue suficiente para decidir que quería volver a salir contigo."
+  ]},
+  { tag:"18 y 24 de abril", paras:[
+    "Luego pasó una semana y llegó el 18 de abril. Después de pasar días hablando hasta tarde, me cansé de decirte pequeñas cosas y decidí decirte que me interesabas. Para mí fue nuevo interesarme en alguien, pero después de estar viéndonos en clase, llegó el 24 de abril y salimos de verdad por primera vez.",
+    "La primera date estábamos nerviosos y te quería besar, pero no te puedo mentir, ese día me daba hasta miedo tocarte. Pero la pasamos muy bien y me diste un dibujito. Ese pequeño gesto me sorprendió mucho."
+  ]},
+  { paras:[
+    "Pasamos al martes, donde por fin nos besamos faltando 5 minutos para que fueran las doce. Lo recuerdo muy bien porque te dije algo que se me vino inmediatamente a la cabeza: \"cómo chupas de rico\". Nos reímos porque no esperaba decir eso y, ciertamente, estábamos muy nerviosos los dos. Fue raro... bueno, bastante raro jsjsssjsjs, pero fue muy lindo. Cada vez que lo recuerdo me río y me sonrojo un poco.",
+    "Dos días después, cuando estábamos en las escaleras del segundo piso en la U, te dije que me enamoré y fue totalmente cierto. A la final ya no me importaba, porque en esos pequeños espacios donde solo estábamos los dos, me encantaba perderme mirándote a ti."
+  ]},
+  { tag:"29 de abril · 15 de mayo", paras:[
+    "Llegó el 29 de abril y estaba un poco raro, y me lo dijiste. Era porque te quería sorprender con unas flores y lo conseguí. Ese día me enamoré más todavía porque entendí que estar contigo me hace olvidar de todo lo malo que existe afuera, y sé que disfrutamos demasiado esa salida.",
+    "Después llegó el 15 de mayo. Ese día me senté a hablar con tus papás y los dos estábamos muy nerviosos, sobre todo yo. Pero uno a veces no viene listo, pero sí dispuesto, y créeme que yo estoy muy dispuesto. Por eso decidí hablar con ellos para darles tranquilidad."
+  ]},
+  { tag:"Junio", paras:[
+    "Sé que para ellos tú eres su mundo y el mundo tuyo son ellos, entonces sé que ese gesto los tranquilizó a los tres.",
+    "En junio hicimos de todo: llamadas, videollamadas, cine, salidas. Te di cartas, me disté al Snoopy. Disfruté mucho, aunque dejamos de vernos tanto."
+  ]},
+  { tag:"Julio", paras:[
+    "En julio solo nos vimos dos días, pero sé que tuvimos muchas ansias por eso. Aunque no nos viéramos seguido, siempre hablamos y eso nos hizo sentir cercanos a pesar de la distancia.",
+    "También ese mes le dije a mi papá que quería que fueras mi novia. Lleno de ansias, decidí que quería que él supiera de ti, hacerle entender que eres especial para mí. No te lo pude contar hasta ahora, pero quería que supieras que incluso en ese momento, cuando todavía no eras oficialmente mi novia, yo ya tenía claro lo que quería contigo."
+  ]},
+  { tag:"Agosto", paras:[
+    "Agosto fue cuando nos volvimos a ver casi a diario. Iniciamos clases, te volví a visitar frecuentemente, salimos al cine con tus papás y salimos a pueblitos. Aunque para mí es raro, agradezco mucho que me incluyeras y sentí muy lindo porque, aunque no es mi familia, no me sentí ajeno a ustedes.",
+    "No te voy a mentir, pensaba formalizar contigo a finales de agosto, pero por los motivos que sabemos, no se pudo. Aun así, eso no me quitó las ganas de hacerlo."
+  ]},
+  { tag:"Septiembre", paras:[
+    "Inicio septiembre y con ello tenía pendiente hablar con tus papás y ver cómo organizaba lo que quería hacer contigo. No te miento, ha sido un poco estresante pensar en tantas cosas, pero me alegra que por fin organicé todo.",
+    "Hablé con tus papás contigo y a solas. Les conté lo que quería hacer y, sorprendentemente, ellos fueron muy positivos y agradecieron el gesto. A la final quedamos que sería en tu casa, cosa que no pensaba que sería así, pero a la final era lo mejor para todos."
+  ]},
+  { paras:[
+    "También pensaba hacer esto el 18, porque es como hemos estado cumpliendo meses, pero por algunas cosas decidí adelantarlo para hoy, 11 de septiembre.",
+    "¿Y sabes qué es lo curioso? Que tú cumples el 4 y yo el 7. Sumando eso daría 11, que curiosamente es el día de hoy. No lo planeaba así."
+  ]},
+  { tag:"Hoy, 11 de septiembre", paras:[
+    "Por eso, el día de hoy te estoy dando esta séptima carta y este tercer ramo. Quería que esos números fueran más especiales todavía, por ello te doy tres lirios, Pinkie Pie y la página web. Tenía esto planeado desde hace meses y por fin lo estoy haciendo. Me gusta verte sonreír, y mucho más cuando somos los dos.",
+    "Básicamente, todo quedó listo para hoy, 11 de septiembre. Solo quiero que sepas que llevaba mucho tiempo esperando por esto."
+  ]},
+  { paras:[
+    "Me importas, y mucho más de lo que logro expresar. Te escribo porque a veces las palabras no son suficientes. Quiero que entiendas que a partir de ahora no estás sola y tienes a una persona que se interesa mucho por ti, además de tus papás, que te aman más que a nada en el mundo.",
+    "Voy a estar dispuesto a todo contigo y espero lo mismo de ti. Quisiera hablar de todo con al menos una persona, como hablo conmigo mismo, y quiero hacerlo contigo y que lo hagas conmigo. Me encanta escucharte y que me escuches. Cuando lo hago no lo hago solo por escuchar, lo hago para entenderte y hablar de ello."
+  ]},
+  { paras:[
+    "En esta carta no quise hablarte poético o romántico como lo he hecho. Quise hablarte de corazón y mente, de lo que hemos vivido y de lo que siento y quiero para ambos.",
+    "A la final, las personas tardan años buscando una persona con quien compartir sus anhelos, metas y alguien leal. Créeme que, si tú lo haces por mí, lo haré de todo corazón para ti."
+  ]},
+  { closing:true, paras:[
+    "Para cerrar, a partir de hoy seremos novios y eso significa muchísimas cosas. Entonces empezaré por decirte que te quiero y que eres la razón por la que me motivo a hacer muchas cosas nuevas."
+  ]}
+];
+
+let cartaIndex = 0;
+let cartaAnimating = false;
+
+function buildCartaPageEl(i){
+  const p = CARTA_PAGES[i];
+  const el = document.createElement('div');
+  el.className = 'carta-page';
+  let html = '';
+  if (p.tag){ html += `<p class="carta-date">✦ ${p.tag} ✦</p>`; }
+  if (p.greeting){ html += `<p class="letter-for">Para: <span>Leila</span> 🌷</p><p class="letter-greeting">Querida Leila,</p>`; }
+  html += `<div class="letter-body">` + p.paras.map(t => `<p>${t}</p>`).join('') + `</div>`;
+  if (p.closing){
+    html += `<div class="letter-divider">✦ ✦ ✦</div><div class="letter-closing"><p class="letter-with-love">Besos para ti, Mon Cœur.</p><p class="letter-signature">De Nicolás, para ti, mi Leila.</p></div>`;
+  }
+  el.innerHTML = html;
+  return el;
+}
+
+function updateCartaControls(){
+  const total = CARTA_PAGES.length;
+  document.getElementById('carta-page-num').textContent = cartaIndex + 1;
+  document.getElementById('carta-page-total').textContent = total;
+  document.getElementById('carta-progress-fill').style.width = (((cartaIndex + 1) / total) * 100) + '%';
+  document.getElementById('carta-prev-btn').disabled = (cartaIndex === 0);
+  document.getElementById('carta-next-btn').disabled = (cartaIndex === total - 1);
+}
+
+function renderCartaPage(i, dir){
+  const vp = document.getElementById('carta-viewport');
+  const el = buildCartaPageEl(i);
+  vp.innerHTML = '';
+  if (dir === 0){
+    el.classList.add('flip-visible');
+    vp.appendChild(el);
+  } else {
+    el.classList.add(dir > 0 ? 'flip-enter-right' : 'flip-enter-left');
+    vp.appendChild(el);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.classList.remove('flip-enter-right', 'flip-enter-left');
+        el.classList.add('flip-visible');
+      });
+    });
+  }
+  updateCartaControls();
+}
+
+function cartaGo(step){
+  if (cartaAnimating) return;
+  const total = CARTA_PAGES.length;
+  const newIndex = cartaIndex + step;
+  if (newIndex < 0 || newIndex >= total) return;
+  cartaAnimating = true;
+  const vp = document.getElementById('carta-viewport');
+  const current = vp.querySelector('.carta-page');
+  if (current){
+    current.classList.remove('flip-visible');
+    current.classList.add(step > 0 ? 'flip-exit-left' : 'flip-exit-right');
+  }
+  setTimeout(() => {
+    cartaIndex = newIndex;
+    renderCartaPage(cartaIndex, step);
+    setTimeout(() => { cartaAnimating = false; }, 400);
+  }, 320);
+}
+
+function initCartaBook(){
+  renderCartaPage(0, 0);
+}
+document.addEventListener('DOMContentLoaded', initCartaBook);
+
+document.addEventListener('keydown', (e) => {
+  const cartaSection = document.getElementById('tab-carta');
+  if (!cartaSection || !cartaSection.classList.contains('active')) return;
+  if (e.key === 'ArrowRight') cartaGo(1);
+  if (e.key === 'ArrowLeft') cartaGo(-1);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const frame = document.querySelector('.carta-frame');
+  if (!frame) return;
+  let sx = 0, sy = 0;
+  frame.addEventListener('touchstart', (e) => {
+    const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY;
+  }, { passive:true });
+  frame.addEventListener('touchend', (e) => {
+    const t = e.changedTouches[0];
+    const dx = t.clientX - sx, dy = t.clientY - sy;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      cartaGo(dx < 0 ? 1 : -1);
+    }
+  }, { passive:true });
+});
+
+// ════════════════════════════════════════
+//  VLOG — video principal (con espacio reservado)
+// ════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  const video = document.getElementById('vlog-main-video');
+  const placeholder = document.getElementById('vlog-main-placeholder');
+  if (!video || !placeholder) return;
+  const showPlaceholder = () => { video.style.display = 'none'; placeholder.classList.add('show'); };
+  video.addEventListener('error', showPlaceholder, true);
+  setTimeout(() => { if (video.readyState === 0) showPlaceholder(); }, 1500);
+});
+
+// ════════════════════════════════════════
+//  DETALLES — mosaico tipo Pinterest (sin huecos)
+// ════════════════════════════════════════
+let _scrapbookCols = null;
+function _scrapbookItems(container){
+  const cols = container.querySelectorAll('.dc-col');
+  if (cols.length){
+    let all = [];
+    cols.forEach(col => { all = all.concat(Array.from(col.children)); });
+    return all;
+  }
+  return Array.from(container.children).filter(el => el.classList.contains('dc-item'));
+}
+function buildScrapbookMasonry(){
+  const container = document.getElementById('detail-scrapbook');
+  if (!container) return;
+  const items = _scrapbookItems(container);
+  if (!items.length) return;
+  const cols = window.innerWidth >= 620 ? 3 : 2;
+  _scrapbookCols = cols;
+  const heights = new Array(cols).fill(0);
+  const colDivs = Array.from({ length: cols }, () => {
+    const c = document.createElement('div'); c.className = 'dc-col'; return c;
+  });
+  items.forEach(item => {
+    const h = item.offsetHeight || 260;
+    let idx = 0;
+    for (let i = 1; i < cols; i++){ if (heights[i] < heights[idx]) idx = i; }
+    colDivs[idx].appendChild(item);
+    heights[idx] += h + 18;
+  });
+  container.innerHTML = '';
+  colDivs.forEach(c => container.appendChild(c));
+  container.classList.add('js-masonry');
+}
+function _whenImagesReady(imgs){
+  return Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(res => {
+    img.addEventListener('load', res, { once:true });
+    img.addEventListener('error', res, { once:true });
+  })));
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('detail-scrapbook');
+  if (!container) return;
+  const imgs = Array.from(container.querySelectorAll('img'));
+  _whenImagesReady(imgs).then(buildScrapbookMasonry);
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      const target = window.innerWidth >= 620 ? 3 : 2;
+      if (target !== _scrapbookCols) buildScrapbookMasonry();
+    }, 200);
+  });
+});
+
+// ════════════════════════════════════════
+//  CORAZÓN DE PALABRAS QUE CAEN — DOM/CSS
+// ════════════════════════════════════════
+const _heartStartedStages = {};
+function startHeartCanvas(canvasId, stageId){
+  if (_heartStartedStages[stageId]) return;
+  _heartStartedStages[stageId] = true;
+
+  const stage  = document.getElementById(stageId);
+  const canvas = document.getElementById(canvasId);
+  if (!stage || !canvas) return;
+  stage.classList.add('love-heart-stage');
+
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0;
+
+  function resize(){
+    const dpr = window.devicePixelRatio || 1;
+    W = stage.offsetWidth;
+    H = stage.offsetHeight;
+    if (!W || !H) return;
+    canvas.width  = W * dpr;
+    canvas.height = H * dpr;
+    canvas.style.width  = W + 'px';
+    canvas.style.height = H + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // ── Ecuación paramétrica del corazón ──
+  function heartXY(t){
+    const s = Math.sin(t);
+    const x = 16 * s * s * s;
+    const y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
+    return { x, y };
+  }
+
+  // ── Path uniforme por arclength (espaciado constante) ──
+  const RAW = 2400;
+  const raw = [];
+  for (let i = 0; i <= RAW; i++) raw.push(heartXY(i / RAW * Math.PI * 2));
+
+  const arcL = [0];
+  for (let i = 1; i < raw.length; i++) {
+    const dx = raw[i].x - raw[i-1].x, dy = raw[i].y - raw[i-1].y;
+    arcL.push(arcL[i-1] + Math.sqrt(dx*dx + dy*dy));
+  }
+  const totalArc = arcL[arcL.length - 1];
+
+  const N = 2000;
+  const uPts = [];
+  let ri = 0;
+  for (let ui = 0; ui < N; ui++) {
+    const tgt = (ui / N) * totalArc;
+    while (ri < arcL.length - 2 && arcL[ri+1] < tgt) ri++;
+    const span = arcL[ri+1] - arcL[ri] || 1;
+    const t2   = (tgt - arcL[ri]) / span;
+    const a    = raw[ri], b = raw[ri+1] || raw[ri];
+    uPts.push({ x: a.x + (b.x-a.x)*t2, y: a.y + (b.y-a.y)*t2 });
+  }
+
+  // ── Punto con offset radial ──
+  function pt(frac, off){
+    const f    = ((frac % 1) + 1) % 1;
+    const i    = Math.floor(f * N);
+    const j    = (i + 1) % N;
+    const p    = uPts[i], q = uPts[j];
+    const dx   = q.x - p.x, dy = q.y - p.y;
+    const len  = Math.sqrt(dx*dx + dy*dy) || 1;
+    const nx   = -dy/len, ny = dx/len;
+    return { x: p.x + nx*off, y: p.y + ny*off, angle: Math.atan2(dy, dx) };
+  }
+
+  // ── Escala corazón → canvas (bounds exactos: W=32, H=28.92, centerY=2.54) ──
+  function toC(hx, hy){
+    const scX = W * 0.86 / 32;
+    const scY = H * 0.86 / 28.92;
+    const sc  = Math.min(scX, scY);
+    return { px: W/2 + hx*sc, py: H/2 + hy*sc - 2.54*sc };
+  }
+
+  // ── Bandas: mismos desfases/velocidades del original, tonos oscurecidos
+  //    para que el texto se lea bien sobre el fondo claro en vez de negro ──
+  const BANDS = [
+    { off:  1.8, speed: 0.020, alpha: 0.95 },
+    { off:  0.6, speed: 0.017, alpha: 0.80 },
+    { off: -0.6, speed: 0.015, alpha: 0.62 },
+    { off: -1.8, speed: 0.013, alpha: 0.44 },
+    { off:  3.0, speed: 0.011, alpha: 0.26 },
+  ];
+  const PHRASE = 'i love you   ';
+  const prog   = BANDS.map((_, i) => i / BANDS.length);
+
+  // ── Offscreen glow cache: pre-render cada char con glow una vez ──
+  let cachedFontSize = 0;
+  let charCache = {};
+
+  function buildCache(fontSize){
+    cachedFontSize = fontSize;
+    charCache = {};
+    const pad = Math.ceil(fontSize * 1.2);
+    const unique = [...new Set(PHRASE.split(''))];
+    unique.forEach(ch => {
+      if (ch === ' ') return;
+      const oc   = document.createElement('canvas');
+      const octx = oc.getContext('2d');
+      oc.width  = Math.ceil(fontSize * 1.5) + pad * 2;
+      oc.height = Math.ceil(fontSize * 1.5) + pad * 2;
+      octx.font         = `italic 500 ${fontSize}px 'Cormorant Garamond', Georgia, serif`;
+      octx.textBaseline = 'middle';
+      octx.textAlign    = 'center';
+      // Glow suave rosa (en vez del glow claro sobre negro del original)
+      for (let g = 3; g >= 1; g--) {
+        octx.shadowColor = `hsla(332, 85%, 55%, 0.55)`;
+        octx.shadowBlur  = g * 4;
+        octx.fillStyle   = `hsl(333, 72%, 40%)`;
+        octx.fillText(ch, oc.width/2, oc.height/2);
+      }
+      charCache[ch] = { canvas: oc, ox: oc.width/2, oy: oc.height/2 };
+    });
+  }
+
+  let raf;
+  let lastT = 0;
+
+  function draw(ts){
+    if (!W || !H) { raf = requestAnimationFrame(draw); return; }
+    const dt = Math.min((ts - lastT) * 0.001, 0.05);
+    lastT = ts;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const fontSize = Math.max(11, Math.min(W, H) * 0.036);
+    if (Math.abs(fontSize - cachedFontSize) > 0.5) buildCache(fontSize);
+
+    const avgCW   = fontSize * 0.50;
+    const scale   = Math.min(W * 0.86 / 32, H * 0.86 / 28.92);
+    const perimPx = totalArc * scale;
+    const nChars  = Math.ceil(perimPx / avgCW) + 2;
+
+    BANDS.forEach((band, bi) => {
+      prog[bi] = (prog[bi] + band.speed * dt) % 1;
+
+      for (let ci = 0; ci < nChars; ci++) {
+        const frac = ((prog[bi] + ci / nChars) % 1 + 1) % 1;
+        const p    = pt(frac, band.off);
+        const { px, py } = toC(p.x, p.y);
+
+        const ch = PHRASE[ci % PHRASE.length];
+        if (ch === ' ' || !charCache[ch]) continue;
+
+        const c = charCache[ch];
+        ctx.save();
+        ctx.globalAlpha = band.alpha;
+        ctx.translate(px, py);
+        ctx.rotate(p.angle);
+        ctx.drawImage(c.canvas, -c.ox, -c.oy);
+        ctx.restore();
+      }
+    });
+
+    raf = requestAnimationFrame(draw);
+  }
+
+  document.fonts.ready.then(() => {
+    lastT = performance.now();
+    raf = requestAnimationFrame(draw);
+  });
+}
+
+// ════════════════════════════════════════
+//  CHISPAS DECORATIVAS EN PANTALLA DE INICIO
+// ════════════════════════════════════════
+function startLoveSparkles(containerId, count){
+  const el = document.getElementById(containerId);
+  if (!el || el.dataset.started) return;
+  el.dataset.started = '1';
+  const glyphs = ['✦','✧','⋆','✿','❋','♡'];
+  for (let i=0;i<count;i++){
+    const s = document.createElement('span');
+    s.textContent = glyphs[Math.floor(Math.random()*glyphs.length)];
+    s.style.left = (Math.random()*100) + '%';
+    s.style.top = (Math.random()*100) + '%';
+    s.style.fontSize = (0.6 + Math.random()*0.9).toFixed(2) + 'rem';
+    s.style.animationDelay = (Math.random()*5).toFixed(2) + 's';
+    s.style.animationDuration = (3.5 + Math.random()*3).toFixed(2) + 's';
+    el.appendChild(s);
+  }
+}
+
+// ════════════════════════════════════════
+//  CORAZONES AMBIENTALES (bienvenida + candado)
+// ════════════════════════════════════════
+const _ambientHeartsStarted = {};
+function startAmbientHearts(canvasId){
+  if (_ambientHeartsStarted[canvasId]) return;
+  _ambientHeartsStarted[canvasId] = true;
+
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  function resize(){
+    const parent = canvas.parentElement;
+    canvas.width  = parent.offsetWidth;
+    canvas.height = parent.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const COUNT = 14;
+  const hearts = [];
+  for (let i=0;i<COUNT;i++) hearts.push(spawn(false));
+
+  function spawn(fromBottom){
+    const size = 18 + Math.random()*46;
+    return {
+      x: Math.random()*canvas.width,
+      y: fromBottom ? canvas.height + size : Math.random()*canvas.height,
+      vy: -(8 + Math.random()*16),
+      vx: (Math.random()-0.5)*6,
+      rot: Math.random()*Math.PI*2,
+      rotSpd: (Math.random()-0.5)*0.6,
+      sway: Math.random()*Math.PI*2,
+      swaySpd: 0.25 + Math.random()*0.35,
+      size,
+      alpha: fromBottom ? 0 : 0.08 + Math.random()*0.18,
+      targetAlpha: 0.14 + Math.random()*0.22,
+    };
+  }
+
+  let lastT = performance.now();
+  function tick(ts){
+    const dt = Math.min((ts-lastT)*0.001, 0.05);
+    lastT = ts;
+    if (!canvas.width || !canvas.height){ requestAnimationFrame(tick); return; }
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const img = FLOWER_IMGS.heart;
+    const ready = img && img.complete && img.naturalWidth;
+
+    hearts.forEach((p, idx) => {
+      p.x += p.vx*dt; p.y += p.vy*dt;
+      p.rot += p.rotSpd*dt; p.sway += p.swaySpd*dt;
+      p.x += Math.sin(p.sway) * 10 * dt;
+      if (p.alpha < p.targetAlpha) p.alpha = Math.min(p.targetAlpha, p.alpha + 0.25*dt);
+      if (p.y < -p.size*2){ hearts[idx] = spawn(true); return; }
+      if (!ready) return;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      const hw = p.size/2, hh = hw*(img.naturalHeight/img.naturalWidth);
+      ctx.drawImage(img, -hw, -hh, p.size, hh*2);
+      ctx.restore();
+    });
+
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ════════════════════════════════════════
+//  PÉTALOS AMBIENTALES EN HOME
+// ════════════════════════════════════════
+const _petalsStarted = {};
+function startHomePetals(canvasId){
+  canvasId = canvasId || 'home-petal-canvas';
+  if (_petalsStarted[canvasId]) return;
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  _petalsStarted[canvasId] = true;
+  const ctx = canvas.getContext('2d');
+  const keys = ['cherry','hibiscus','peony'];
+  let petals = [];
+
+  function targetCount(){
+    // más flores mientras más larga sea la sección, para que no se vea vacío
+    return Math.max(16, Math.round(canvas.height / 90));
+  }
+
+  function measureContentHeight(){
+    // altura real del contenido de la sección, EXCLUYENDO este mismo canvas
+    // (evita que el propio canvas infle la medición al crecer)
+    const parent = canvas.parentElement;
+    let max = parent.clientHeight || 0;
+    for (const child of parent.children){
+      if (child === canvas) continue;
+      const bottom = child.offsetTop + child.offsetHeight;
+      if (bottom > max) max = bottom;
+    }
+    return max;
+  }
+
+  function resize(){
+    const parent = canvas.parentElement;
+    canvas.width = parent.clientWidth || parent.offsetWidth;
+    const h = measureContentHeight();
+    if (h > 0) canvas.height = h;
+    const want = targetCount();
+    if (petals.length < want){
+      while (petals.length < want) petals.push(spawn(false));
+    } else if (petals.length > want){
+      petals.length = want;
+    }
+  }
+
+  function spawn(fromBottom){
+    const size = 26 + Math.random()*46;
+    return {
+      key: keys[Math.floor(Math.random()*keys.length)],
+      x: Math.random()*canvas.width,
+      y: fromBottom ? canvas.height+size : Math.random()*canvas.height,
+      vy: -(14+Math.random()*26), vx:(Math.random()-0.5)*10,
+      rot: Math.random()*Math.PI*2, rotSpd:(Math.random()-0.5)*0.5,
+      sway: Math.random()*Math.PI*2, swaySpd:0.3+Math.random()*0.4,
+      size, alpha: fromBottom?0:Math.random()*0.16, targetAlpha:0.12+Math.random()*0.14,
+    };
+  }
+
+  resize();
+  window.addEventListener('resize', resize);
+  // el contenido (fotos) sigue creciendo la sección tras el primer layout,
+  // así que observamos el tamaño real del contenedor y recalculamos
+  const parentEl = canvas.parentElement;
+  if ('ResizeObserver' in window){
+    new ResizeObserver(() => resize()).observe(parentEl);
+  }
+  // red de seguridad por si las imágenes cargan tarde
+  [400, 1200, 2500, 4000].forEach(t => setTimeout(resize, t));
+
+  let lastT = performance.now();
+  function tick(ts){
+    const dt = Math.min((ts-lastT)*0.001, 0.05);
+    lastT = ts;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    petals.forEach((p, idx) => {
+      p.x += p.vx*dt; p.y += p.vy*dt;
+      p.rot += p.rotSpd*dt; p.sway += p.swaySpd*dt;
+      p.x += Math.sin(p.sway)*12*dt;
+      if (p.alpha < p.targetAlpha) p.alpha = Math.min(p.targetAlpha, p.alpha+0.3*dt);
+      if (p.y < -p.size*2){ petals[idx] = spawn(true); return; }
+      const img = FLOWER_IMGS[p.key];
+      if (!img || !img.complete || !img.naturalWidth) return;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x,p.y); ctx.rotate(p.rot);
+      const hw = p.size/2, hh = hw*(img.naturalHeight/img.naturalWidth);
+      ctx.drawImage(img,-hw,-hh,p.size,hh*2);
+      ctx.restore();
+    });
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+// ════════════════════════════════════════
+//  SCROLL REVEAL — tulipán y línea de tiempo
+// ════════════════════════════════════════
+function initScrollReveal(){
+  const targets = document.querySelectorAll('.tulip-card, .tl-item');
+  if (!('IntersectionObserver' in window)){
+    targets.forEach(t => t.classList.add('in-view'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in-view'); });
+  }, { threshold: 0.2 });
+  targets.forEach(t => io.observe(t));
+}
+
+// ════════════════════════════════════════
+//  LIGHTBOX — fotos y videos en grande
+// ════════════════════════════════════════
+const LB_PHOTOS = Array.from({length:20}, (_,i) => `gallery-photos/g${i+1}.jpeg`);
+const LB_VIDEOS = Array.from({length:5}, (_,i) => `videos/v${i+1}.mp4`);
+
+let lbType = null;
+let lbIndex = 0;
+
+function openLightbox(type, index){
+  lbType = type;
+  lbIndex = index;
+  renderLightbox();
+  document.getElementById('lightbox-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderLightbox(){
+  const content = document.getElementById('lb-content');
+  content.innerHTML = '';
+  if (lbType === 'photo'){
+    const img = document.createElement('img');
+    img.src = LB_PHOTOS[lbIndex];
+    img.alt = 'Recuerdo';
+    content.appendChild(img);
+  } else {
+    const video = document.createElement('video');
+    video.src = LB_VIDEOS[lbIndex];
+    video.controls = true;
+    video.autoplay = true;
+    video.playsInline = true;
+    content.appendChild(video);
+  }
+}
+
+function closeLightbox(){
+  document.getElementById('lightbox-overlay').classList.remove('open');
+  document.getElementById('lb-content').innerHTML = '';
+  document.body.style.overflow = '';
+}
+
+function lbNav(delta){
+  const list = lbType === 'photo' ? LB_PHOTOS : LB_VIDEOS;
+  lbIndex = (lbIndex + delta + list.length) % list.length;
+  renderLightbox();
+}
+
+document.addEventListener('keydown', (e) => {
+  const overlay = document.getElementById('lightbox-overlay');
+  if (!overlay || !overlay.classList.contains('open')) return;
+  if (e.key === 'Escape') closeLightbox();
+  if (e.key === 'ArrowLeft') lbNav(-1);
+  if (e.key === 'ArrowRight') lbNav(1);
+});
+</script>
+</body>
+</html>
